@@ -1,6 +1,8 @@
 defmodule ECSx.MixProject do
   use Mix.Project
 
+  @gh_url "https://github.com/APB9785/ECSx"
+
   def project do
     [
       app: :ecsx,
@@ -8,7 +10,11 @@ defmodule ECSx.MixProject do
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      description: description(),
+      package: package(),
+      deps: deps(),
+      name: "ECSx",
+      source_url: @gh_url
     ]
   end
 
@@ -22,6 +28,16 @@ defmodule ECSx.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp description do
+    "An Entity-Component-System framework for Elixir"
+  end
+
+  defp package do
+    [
+      links: %{"GitHub" => @gh_url}
+    ]
+  end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do

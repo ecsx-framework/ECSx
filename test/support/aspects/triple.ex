@@ -1,4 +1,4 @@
 defmodule ECSx.Test.Triple do
-  use ECSx.Component,
+  use ECSx.Aspect,
     schema: {:id, :foo, :bar}
 end
