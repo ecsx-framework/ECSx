@@ -4,10 +4,10 @@ defmodule ECSx.Aspect do
 
   For example, if Entities in your application should have a "color" value, you will
   create an Aspect called `Color`.  This allows you to add a color Component to an Entity
-  with `add/1`, query the color value for a given Entity with `get/1` or `get_value/2`,
-  query all Entities which have a color value with `get_all/0`, remove the color value
-  from an Entity altogether with `remove/1`, or test whether an entity has a color with
-  `has_component?/1`.
+  with `add_component/1`, query the color value for a given Entity with `get_component/1`
+  or `get_value/2`, query all Entities which have a color value with `get_all/0`, remove
+  the color value from an Entity altogether with `remove_component/1`, or test whether
+  an entity has a color with `has_component?/1`.
 
   ## Usage
 
@@ -15,7 +15,7 @@ defmodule ECSx.Aspect do
   ETS table settings.  The schema defines the field names which will be used to reference
   each value.
 
-      defmodule MyApp.Component.Color do
+      defmodule MyApp.Aspects.Color do
         use ECSx.Aspect,
           schema: {:entity_id, :hue, :saturation, :lightness}
       end
@@ -35,31 +35,34 @@ defmodule ECSx.Aspect do
   has a "Height" Aspect, Entities would never need more than one Component to model that value.
   However, if you had an Aspect such as "TakingDamageOverTime", you might want an Entity to
   store each source of damage as a separate value, using multiple Components of the same Aspect.
+  To do this, set `:table_type` to `:bag`.
 
   ### Example
 
       defmodule TakingDamageOverTime do
         use ECSx.Aspect,
-          schema: {:entity_id, :damage_per_second, :damage_type, :source_id}
+          schema: {:entity_id, :damage_per_second, :damage_type, :source_id},
+          table_type: :bag
       end
 
       alias TakingDamageOverTime, as: DOT
 
-      DOT.add(entity_id: hero.id, damage_per_second: 10, type: :poison, source_id: spider.id)
-      DOT.add(entity_id: hero.id, damage_per_second: 25, type: :fire, source_id: dragon.id)
+      DOT.add_component(entity_id: hero.id, damage_per_second: 10, type: :poison, source_id: spider.id)
+      DOT.add_component(entity_id: hero.id, damage_per_second: 25, type: :fire, source_id: dragon.id)
 
-      DOT.get(hero.id)
+      DOT.get_component(hero.id)
       [%{entity_id: ...}, %{...}]
 
       DOT.get_value(hero.id, :damage_per_second)
       [10, 25]
 
-  ## `get/1` and `get_value/2`
+  ## `get_component/1` and `get_value/2`
 
-  The standard way to fetch the component(s) from an Entity is using `MyAspect.get(entity_id)`.
-  If your `table_type` is `:set` or `:ordered_set`, this function will return a single
-  Component, or `nil` if the Entity does not have that Aspect.  If the `table_type` is `:bag`
-  or `:duplicate_bag`, then it will return a list containing zero or more Components.
+  The standard way to fetch the component(s) from an Entity is using
+  `MyAspect.get_component(entity_id)`. If your `table_type` is `:set` or `:ordered_set`,
+  this function will return a single Component, or `nil` if the Entity does not have
+  that Aspect.  If the `table_type` is `:bag` or `:duplicate_bag`, then it will return
+  a list containing zero or more Components.
 
   Each Component is represented by a map, using the keys provided by the schema.  If you only
   want a single value from the Component, use `get_value/2`, passing the field name of the
@@ -67,7 +70,7 @@ defmodule ECSx.Aspect do
 
   ### Examples
 
-      Color.get(entity_id)
+      Color.get_component(entity_id)
       %{entity_id: entity_id, hue: 300, saturation: 50, lightness: 45}
 
       Color.get_value(entity_id, :hue)
@@ -96,7 +99,7 @@ defmodule ECSx.Aspect do
         :ok
       end
 
-      def add(attrs) do
+      def add_component(attrs) do
         row =
           @fields
           |> Enum.map(&Keyword.fetch!(attrs, &1))
@@ -107,7 +110,7 @@ defmodule ECSx.Aspect do
       end
 
       if @table_type in ~w(set ordered_set)a do
-        def get(entity_id) do
+        def get_component(entity_id) do
           case :ets.lookup(@table_name, entity_id) do
             [] -> nil
             [object] -> ECSx.Component.mapify(object, @fields)
@@ -121,7 +124,7 @@ defmodule ECSx.Aspect do
           end
         end
       else
-        def get(entity_id) do
+        def get_component(entity_id) do
           @table_name
           |> :ets.lookup(entity_id)
           |> Enum.map(&ECSx.Component.mapify(&1, @fields))
@@ -140,7 +143,7 @@ defmodule ECSx.Aspect do
         |> Enum.map(&ECSx.Component.mapify(&1, @fields))
       end
 
-      def remove(entity_id) do
+      def remove_component(entity_id) do
         :ets.delete(@table_name, entity_id)
         :ok
       end
@@ -162,12 +165,12 @@ defmodule ECSx.Aspect do
       ECSx.Component.add(ArmorRating, entity_id: 123, value: 10)
 
   """
-  @callback add(attrs :: Keyword.t()) :: :ok
+  @callback add_component(attrs :: Keyword.t()) :: :ok
 
   @doc """
   Gets an existing Component from the table, given its entity ID.
   """
-  @callback get(entity_id :: any) :: t
+  @callback get_component(entity_id :: any) :: t
 
   @doc """
   Gets a single value from a component.
@@ -182,7 +185,7 @@ defmodule ECSx.Aspect do
   @doc """
   Removes any existing components of this aspect from an entity.
   """
-  @callback remove(entity_id :: any) :: :ok
+  @callback remove_component(entity_id :: any) :: :ok
 
   @doc """
   Checks if an entity has one or more components with this aspect.
