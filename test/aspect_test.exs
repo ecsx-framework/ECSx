@@ -7,14 +7,14 @@ defmodule ECSx.AspectTest do
     test "generates functions for an aspect" do
       assert :ok == Couple.init()
 
-      assert :ok == Couple.add(id: 11, foo: "Andy")
+      assert :ok == Couple.add_component(id: 11, foo: "Andy")
 
-      assert %{id: 11, foo: "Andy"} == Couple.get(11)
+      assert %{id: 11, foo: "Andy"} == Couple.get_component(11)
 
       for {id, foo} <- [{1, "A"}, {2, "B"}, {3, "C"}],
-          do: Couple.add(id: id, foo: foo)
+          do: Couple.add_component(id: id, foo: foo)
 
-      assert :ok == Couple.remove(3)
+      assert :ok == Couple.remove_component(3)
 
       refute Couple.has_component?(3)
 

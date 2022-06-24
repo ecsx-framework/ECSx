@@ -94,61 +94,29 @@ defmodule ECSx.Aspect do
       @table_name opts[:table_name] || __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
 
-      def init do
-        :ets.new(@table_name, [:named_table, @table_type, @concurrency])
-        :ok
-      end
+      def init, do: ECSx.Aspect.init(@table_name, @table_type, @concurrency)
 
-      def add_component(attrs) do
-        row =
-          @fields
-          |> Enum.map(&Keyword.fetch!(attrs, &1))
-          |> List.to_tuple()
-
-        :ets.insert(@table_name, row)
-        :ok
-      end
+      def add_component(attrs), do: ECSx.Component.add(@table_name, attrs, @fields)
 
       if @table_type in ~w(set ordered_set)a do
-        def get_component(entity_id) do
-          case :ets.lookup(@table_name, entity_id) do
-            [] -> nil
-            [object] -> ECSx.Component.mapify(object, @fields)
-          end
-        end
+        def get_component(entity_id),
+          do: ECSx.Component.get_one(@table_name, entity_id, @fields)
 
-        def get_value(entity_id, field) do
-          case :ets.lookup(@table_name, entity_id) do
-            [] -> nil
-            [object] -> ECSx.Component.parse_field(object, @fields, field)
-          end
-        end
+        def get_value(entity_id, field),
+          do: ECSx.Component.get_value(@table_name, entity_id, field, @fields)
       else
-        def get_component(entity_id) do
-          @table_name
-          |> :ets.lookup(entity_id)
-          |> Enum.map(&ECSx.Component.mapify(&1, @fields))
-        end
+        def get_component(entity_id),
+          do: ECSx.Component.get_many(@table_name, entity_id, @fields)
 
-        def get_value(entity_id, field) do
-          @table_name
-          |> :ets.lookup(entity_id)
-          |> Enum.map(&ECSx.Component.parse_field(&1, @fields, field))
-        end
+        def get_value(entity_id, field),
+          do: ECSx.Component.get_values(@table_name, entity_id, field, @fields)
       end
 
-      def get_all do
-        @table_name
-        |> :ets.tab2list()
-        |> Enum.map(&ECSx.Component.mapify(&1, @fields))
-      end
+      def get_all, do: ECSx.Component.get_all(@table_name, @fields)
 
-      def remove_component(entity_id) do
-        :ets.delete(@table_name, entity_id)
-        :ok
-      end
+      def remove_component(entity_id), do: ECSx.Component.remove(@table_name, entity_id)
 
-      def has_component?(entity_id), do: :ets.member(@table_name, entity_id)
+      def has_component?(entity_id), do: ECSx.Component.exists?(@table_name, entity_id)
     end
   end
 
@@ -162,13 +130,13 @@ defmodule ECSx.Aspect do
 
   ## Example
 
-      ECSx.Component.add(ArmorRating, entity_id: 123, value: 10)
+      ArmorRating.add_component(entity_id: 123, value: 10)
 
   """
   @callback add_component(attrs :: Keyword.t()) :: :ok
 
   @doc """
-  Gets an existing Component from the table, given its entity ID.
+  Gets an existing component from the table, given its entity ID.
   """
   @callback get_component(entity_id :: any) :: t
 
@@ -191,4 +159,9 @@ defmodule ECSx.Aspect do
   Checks if an entity has one or more components with this aspect.
   """
   @callback has_component?(entity_id :: any) :: boolean
+
+  def init(table_name, table_type, concurrency) do
+    :ets.new(table_name, [:named_table, table_type, concurrency])
+    :ok
+  end
 end

@@ -11,16 +11,16 @@ defmodule ECSx.SystemTest do
       couples = Couple.get_all()
 
       Enum.each(couples, fn %{id: id, foo: foo} ->
-        Couple.remove(id)
-        Couple.add(id: id, foo: foo + 1)
+        Couple.remove_component(id)
+        Couple.add_component(id: id, foo: foo + 1)
       end)
     end
   end
 
   setup do
     Couple.init()
-    Couple.add(id: 1, foo: 1)
-    Couple.add(id: 100, foo: 100)
+    Couple.add_component(id: 1, foo: 1)
+    Couple.add_component(id: 100, foo: 100)
   end
 
   describe "Incrementer system" do
