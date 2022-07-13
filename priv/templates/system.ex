@@ -1,4 +1,4 @@
-defmodule <%= inspect app_name %>.Systems.<%= system_name %> do
+defmodule <%= app_name %>.Systems.<%= system_name %> do
   @moduledoc """
   Documentation for <%= system_name %> system.
   """

@@ -1,4 +1,4 @@
-defmodule <%= inspect app_name %>.Manager do
+defmodule <%= app_name %>.Manager do
   @moduledoc """
   ECSx manager.
   """
@@ -11,14 +11,14 @@ defmodule <%= inspect app_name %>.Manager do
   # Declare all valid Aspects
   def aspects do
     [
-      <%= inspect app_name %>.Aspects.SampleAspect
+      <%= app_name %>.Aspects.SampleAspect
     ]
   end
 
   # Declare all Systems to run
   def systems do
     [
-      <%= inspect app_name %>.Systems.SampleSystem
+      <%= app_name %>.Systems.SampleSystem
     ]
   end
 end
