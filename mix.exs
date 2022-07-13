@@ -10,6 +10,13 @@ defmodule ECSx.MixProject do
       version: @version,
       elixir: "~> 1.13",
       deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
 
@@ -53,7 +60,8 @@ defmodule ECSx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:benchee, "~> 1.1", only: :dev}
+      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14.4", only: :test}
     ]
   end
 end
