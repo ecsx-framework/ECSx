@@ -1,4 +1,4 @@
-defmodule <%= inspect app_name %>.Aspects.<%= aspect_name %> do
+defmodule <%= app_name %>.Aspects.<%= aspect_name %> do
   @moduledoc """
   Documentation for <%= aspect_name %> components.
   """
