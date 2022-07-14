@@ -9,6 +9,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
   """
 
   use Mix.Task
+  import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
 
   @doc false
   def run(_args) do
@@ -51,27 +52,5 @@ defmodule Mix.Tasks.Ecsx.Setup do
     binding = [app_name: root_module(), system_name: "SampleSystem"]
 
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))
-  end
-
-  defp otp_app do
-    Mix.Project.config()
-    |> Keyword.fetch!(:app)
-  end
-
-  defp root_module do
-    config = Mix.Project.config()
-
-    case Keyword.get(config, :name) do
-      nil -> config |> Keyword.fetch!(:app) |> root_module()
-      name -> name
-    end
-  end
-
-  defp root_module(otp_app) do
-    otp_app
-    |> to_string()
-    |> Macro.camelize()
-    |> List.wrap()
-    |> Module.concat()
   end
 end

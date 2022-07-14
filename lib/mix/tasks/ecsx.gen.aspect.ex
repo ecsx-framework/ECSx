@@ -9,6 +9,7 @@ defmodule Mix.Tasks.Ecsx.Gen.Aspect do
   """
 
   use Mix.Task
+  import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0, write_file: 2]
 
   @doc false
   def run([aspect_name | _] = args) do
@@ -37,28 +38,4 @@ defmodule Mix.Tasks.Ecsx.Gen.Aspect do
     |> Enum.intersperse(pattern <> "      #{inspect(root_module())}.Aspects.#{aspect_name},\n")
     |> write_file(manager_path)
   end
-
-  defp otp_app do
-    Mix.Project.config()
-    |> Keyword.fetch!(:app)
-  end
-
-  defp root_module do
-    config = Mix.Project.config()
-
-    case Keyword.get(config, :name) do
-      nil -> config |> Keyword.fetch!(:app) |> root_module()
-      name -> name
-    end
-  end
-
-  defp root_module(otp_app) do
-    otp_app
-    |> to_string()
-    |> Macro.camelize()
-    |> List.wrap()
-    |> Module.concat()
-  end
-
-  defp write_file(contents, path), do: File.write!(path, contents)
 end

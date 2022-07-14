@@ -1,36 +1,25 @@
-# Get Mix output sent to the current process to avoid polluting tests.
-Mix.shell(Mix.Shell.Process)
+Code.require_file("../../support/mix_helper.exs", __DIR__)
 
 defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
   use ExUnit.Case
 
+  import ECSx.MixHelper
+
   setup_all do
-    File.mkdir!("tmp")
+    create_sample_ecsx_project()
 
-    File.cd!("tmp", fn ->
-      File.mkdir!("lib")
-      File.mkdir!("lib/ecsx")
-      File.mkdir!("lib/ecsx/systems")
-
-      source = Application.app_dir(:ecsx, "/priv/templates/manager.ex")
-      content = EEx.eval_file(source, app_name: MyApp)
-      File.write!("lib/ecsx/manager.ex", content)
-    end)
-
-    on_exit(fn ->
-      File.rm_rf!("tmp")
-    end)
+    on_exit(&clean_tmp_dir/0)
 
     :ok
   end
 
   test "generates aspect in existing project" do
-    File.cd!("tmp", fn ->
+    Mix.Project.in_project(:my_app, ".", fn _module ->
       Mix.Tasks.Ecsx.Gen.System.run(["FooSystem"])
 
-      system_file = File.read!("lib/ecsx/systems/foo_system.ex")
+      system_file = File.read!("lib/my_app/systems/foo_system.ex")
 
-      assert system_file =~ "defmodule ECSx.Systems.FooSystem do"
+      assert system_file =~ "defmodule MyApp.Systems.FooSystem do"
       assert system_file =~ "@moduledoc \"\"\"\n  Documentation for FooSystem system."
       assert system_file =~ "use ECSx.System"
       assert system_file =~ "def run do"
