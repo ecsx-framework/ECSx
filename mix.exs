@@ -37,6 +37,14 @@ defmodule ECSx.MixProject do
     ]
   end
 
+  # Run "mix help deps" to learn about dependencies.
+  defp deps do
+    [
+      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14.4", only: :test}
+    ]
+  end
+
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
@@ -53,15 +61,16 @@ defmodule ECSx.MixProject do
       source_ref: "v#{@version}",
       logo: nil,
       extra_section: "GUIDES",
-      source_url: @gh_url
+      source_url: @gh_url,
+      extras: extras()
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
-  defp deps do
+  defp extras do
     [
-      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.14.4", only: :test}
+      "guides/installation.md",
+      "guides/tutorial.md",
+      "guides/ecs_design.md"
     ]
   end
 end
