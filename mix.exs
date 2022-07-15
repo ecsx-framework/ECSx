@@ -51,6 +51,8 @@ defmodule ECSx.MixProject do
 
   defp package do
     [
+      maintainers: ["Andrew P Berrien"],
+      licenses: ["GPL-3.0"],
       links: %{"GitHub" => @gh_url}
     ]
   end
