@@ -1,7 +1,5 @@
 defmodule Mix.Tasks.ECSx.Helpers do
-  @moduledoc """
-  Helpers for the ECSx mmix tasks.
-  """
+  @moduledoc false
 
   def otp_app do
     Mix.Project.config()

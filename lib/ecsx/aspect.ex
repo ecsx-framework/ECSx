@@ -160,6 +160,7 @@ defmodule ECSx.Aspect do
   """
   @callback has_component?(entity_id :: any) :: boolean
 
+  @doc false
   def init(table_name, table_type, concurrency) do
     :ets.new(table_name, [:named_table, table_type, concurrency])
     :ok
