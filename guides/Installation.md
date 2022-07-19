@@ -3,7 +3,8 @@
 To create an ECSx application, there are a few simple steps:
 
   * install Elixir + erlang/OTP
-  * create an Elixir project
+  * install Phoenix (optional)
+  * create an Elixir/Phoenix project
   * fetch ECSx as a dependency for your project
   * run the ECSx setup
 
@@ -11,20 +12,22 @@ To create an ECSx application, there are a few simple steps:
 
 If you don't yet have Elixir and erlang/OTP installed on your machine, follow the instructions on the official [Installation Page](https://elixir-lang.org/install.html).  
 
+## Phoenix
+
+If you plan on hosting your application online, you'll probably want to use Phoenix.  You can skip this step if you only want to run the app locally.  Otherwise, follow the instructions for Phoenix [installation](https://hexdocs.pm/phoenix/installation.html) (the tutorial project will assume you are using Phoenix).
+
 ## Create project
 
-To create a new Elixir application with supervision tree, run the following command:
-
-```console
-$ mix new my_app --sup
-```
-
-Where `my_app` will be the name of your app.
-
-If you want to use the [Phoenix Web Framework](https://hexdocs.pm/phoenix/overview.html), instead run (after hex and phx_new are installed):
+If you are using Phoenix, you'll create your new application with the command
 
 ```console
 $ mix phx.new my_app
+```
+
+Or for a regular Elixir application (with supervision tree):
+
+```console
+$ mix new my_app --sup
 ```
 
 ## Install ECSx

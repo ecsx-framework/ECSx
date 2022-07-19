@@ -6,16 +6,30 @@ small fragments called Components, which are then read and updated by Systems.
 
 ## Setup
 
-### Adding ECSx to an existing project
+* Add `:ecsx` to the list of dependencies in `mix.exs`:
 
-* Add `{:ecsx, github: "APB9785/ECSx"}` to your deps (Hex install coming soon)
+```elixir
+def deps do
+  [
+    {:ecsx, "~> 0.1"}
+  ]
+end
+```
+
 * Run `mix deps.get`
 * Run `mix ecsx.setup`
-* Add the generated module `YourApp.Manager` to your application's supervision tree
+* Add the generated Manager module to your application's supervision tree:
 
-### Creating a new ECSx project
+```elixir
+def start(_type, _args) do
+  children = [
+    MyApp.Manager
+  ]
 
-* Coming soon!
+  opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+  Supervisor.start_link(children, opts)
+end
+```
 
 ## Usage
 
@@ -58,3 +72,11 @@ you during `mix ecsx.setup` and will be automatically updated by the other gener
 
 It is especially important to consider the order of your systems list.  The manager will run each
 system one at a time, in order.
+
+## License
+
+Copyright (C) 2022  Andrew P Berrien
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the [GNU General Public License](https://www.gnu.org/licenses/gpl.html) for more details.
