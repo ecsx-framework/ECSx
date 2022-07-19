@@ -1,6 +1,6 @@
 defmodule ECSx.Aspect do
   @moduledoc """
-  Aspects provide an API for working with Components of a specific type.
+  Provides an API for working with Components of a specific type.
 
   For example, if Entities in your application should have a "color" value, you will
   create an Aspect called `Color`.  This allows you to add a color Component to an Entity

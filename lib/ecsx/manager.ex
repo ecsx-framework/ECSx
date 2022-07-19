@@ -1,5 +1,7 @@
 defmodule ECSx.Manager do
   @moduledoc """
+  The Manager for your ECSx application.
+
   In an ECSx application, the Manager is responsible for:
 
     * starting up ETS tables for each Aspect, where the Components will be stored

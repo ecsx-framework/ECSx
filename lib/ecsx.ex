@@ -1,6 +1,8 @@
 defmodule ECSx do
   @moduledoc """
-  ECSx is an Entity-Component-System (ECS) framework for Elixir. In ECS:
+  ECSx is an Entity-Component-System (ECS) framework for Elixir.
+
+  In ECS:
 
   * Every game object is an Entity, represented by a unique ID.
   * The data which comprises an Entity is split among many Components.

@@ -1,6 +1,6 @@
 defmodule ECSx.System do
   @moduledoc """
-  A system is a fragment of game logic which acts on all entities with the desired components.
+  A fragment of game logic which reads and updates Components.
 
   Every system must implement a `run` function.
 

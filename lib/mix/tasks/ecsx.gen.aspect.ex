@@ -4,7 +4,10 @@ defmodule Mix.Tasks.Ecsx.Gen.Aspect do
   @moduledoc """
   Generates a new Aspect for an ECSx application.
 
-      $ mix ecsx.gen.aspect
+      $ mix ecsx.gen.aspect Color entity_id hue saturation lightness
+
+  The first argument is the name of the Aspect module, followed by the data fields
+  which will make up each Component.
 
   """
 
