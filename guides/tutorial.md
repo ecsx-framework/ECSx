@@ -36,3 +36,25 @@ We can use the ECSx generators to quickly create the files needed for these aspe
 ```
 
 Following the above pattern, run `ecsx.gen.aspect` for the remaining four aspects.
+
+Next we have to think about the Systems which will organize game logic.  What makes a Snake game work?
+
+  * Snakes move forwards every game tick
+  * Snakes change direction when a player gives input
+  * Snakes get longer over time (or based on other game conditions)
+  * When a collision is detected, one or both snakes are removed from the game
+
+Each one of these will be the responsibility of a different System:
+
+  ForwardMovement
+  PlayerInput
+  GrowTail
+  Collision
+
+We will generate modules for each of these Systems with `ecsx.gen.system`.  For example:
+
+```console
+  $ mix ecsx.gen.system ForwardMovement
+```
+
+After generating all four of our Systems, it's time to write the game logic for each one - COMING SOON

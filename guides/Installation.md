@@ -56,7 +56,7 @@ With ECSx installed, you can run the setup generator:
 $ mix ecsx.setup
 ```
 
-which will create the Manager, a sample Aspect, and a sample System to get your project started.
+which will create the Manager, and two folders to get your project started.
 
 ## Summary
 
