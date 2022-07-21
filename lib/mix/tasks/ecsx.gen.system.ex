@@ -6,6 +6,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
 
       $ mix ecsx.gen.system Foo
 
+  The only argument accepted is a module name for the System.
   """
 
   use Mix.Task

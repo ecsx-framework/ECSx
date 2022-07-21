@@ -6,16 +6,23 @@ defmodule Mix.Tasks.Ecsx.Setup do
 
       $ mix ecsx.setup
 
+  This setup will generate `manager.ex` and empty folders for aspects and systems.
+
+  If you don't want to generate the folders, you can provide option `--no-folders`
   """
 
   use Mix.Task
   import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
 
   @doc false
-  def run(_args) do
+  def run(args) do
+    {opts, _, _} = OptionParser.parse(args, strict: [folders: :boolean])
+
     create_manager()
-    create_sample_aspect()
-    create_sample_system()
+
+    if Keyword.get(opts, :folders, true) do
+      create_folders()
+    end
 
     Mix.shell().info("""
 
@@ -38,19 +45,8 @@ defmodule Mix.Tasks.Ecsx.Setup do
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))
   end
 
-  defp create_sample_aspect do
-    target = "lib/#{otp_app()}/aspects/sample_aspect.ex"
-    source = Application.app_dir(:ecsx, "/priv/templates/aspect.ex")
-    binding = [app_name: root_module(), fields: ":entity_id, :value", aspect_name: "SampleAspect"]
-
-    Mix.Generator.create_file(target, EEx.eval_file(source, binding))
-  end
-
-  defp create_sample_system do
-    target = "lib/#{otp_app()}/systems/sample_system.ex"
-    source = Application.app_dir(:ecsx, "/priv/templates/system.ex")
-    binding = [app_name: root_module(), system_name: "SampleSystem"]
-
-    Mix.Generator.create_file(target, EEx.eval_file(source, binding))
+  defp create_folders do
+    Mix.Generator.create_directory("lib/#{otp_app()}/aspects")
+    Mix.Generator.create_directory("lib/#{otp_app()}/systems")
   end
 end

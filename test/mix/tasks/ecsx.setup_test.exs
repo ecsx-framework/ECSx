@@ -15,12 +15,10 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
     :ok
   end
 
-  test "generates manager and samples" do
+  test "generates manager and folders" do
     Mix.Tasks.Ecsx.Setup.run([])
 
     manager_file = File.read!("lib/ecsx/manager.ex")
-    aspect_file = File.read!("lib/ecsx/aspects/sample_aspect.ex")
-    system_file = File.read!("lib/ecsx/systems/sample_system.ex")
 
     assert manager_file =~ "defmodule ECSx.Manager do"
     assert manager_file =~ "@moduledoc \"\"\"\n  ECSx manager."
@@ -29,14 +27,15 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
     assert manager_file =~ "def aspects do\n    [\n      ECSx.Aspects.SampleAspect"
     assert manager_file =~ "def systems do\n    [\n      ECSx.Systems.SampleSystem"
 
-    assert aspect_file =~ "defmodule ECSx.Aspects.SampleAspect do"
-    assert aspect_file =~ "@moduledoc \"\"\"\n  Documentation for SampleAspect components."
-    assert aspect_file =~ "use ECSx.Aspect,"
-    assert aspect_file =~ "schema: {:entity_id, :value}"
+    assert File.dir?("lib/ecsx/aspects")
+    assert File.dir?("lib/ecsx/systems")
+  end
 
-    assert system_file =~ "defmodule ECSx.Systems.SampleSystem do"
-    assert system_file =~ "@moduledoc \"\"\"\n  Documentation for SampleSystem system."
-    assert system_file =~ "use ECSx.System"
-    assert system_file =~ "def run do"
+  test "--no-folders option" do
+    Mix.Tasks.Ecsx.Setup.run(["--no-folders"])
+
+    assert File.exists?("lib/ecsx/manager.ex")
+    refute File.dir?("lib/ecsx/aspects")
+    refute File.dir?("lib/ecsx/systems")
   end
 end

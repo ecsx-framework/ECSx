@@ -8,7 +8,6 @@ defmodule Mix.Tasks.Ecsx.Gen.Aspect do
 
   The first argument is the name of the Aspect module, followed by the data fields
   which will make up each Component.
-
   """
 
   use Mix.Task
