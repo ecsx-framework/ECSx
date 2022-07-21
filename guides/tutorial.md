@@ -15,19 +15,21 @@ First, let's start with a single entity.  In ECS, an entity is nothing by itself
 
 For each of these requirements, we will create an aspect:
 
+```
   Position
   Moving
   Direction
   Length
   OnContact
+```
 
 For each of these aspects, we'll define a schema which contains the ID of the entity, and any relevant data:
 
-  Position: `{entity_id, x, y}` ex: `{123, 0, -50}`
-  Moving: `{entity_id, speed}` ex: `{123, 1}`
-  Direction: `{entity_id, direction}` ex: `{123, :north}`
-  Length: `{entity_id, length}` ex: `{123, 10}`
-  OnContact: `{entity_id, result_of_contact}` ex: `{123, :death}`
+  * Position: `{entity_id, x, y}` ex: `{123, 0, -50}`
+  * Moving: `{entity_id, speed}` ex: `{123, 1}`
+  * Direction: `{entity_id, direction}` ex: `{123, :north}`
+  * Length: `{entity_id, length}` ex: `{123, 10}`
+  * OnContact: `{entity_id, result_of_contact}` ex: `{123, :death}`
 
 We can use the ECSx generators to quickly create the files needed for these aspects:
 
@@ -35,7 +37,7 @@ We can use the ECSx generators to quickly create the files needed for these aspe
   $ mix ecsx.gen.aspect Position entity_id x y
 ```
 
-Following the above pattern, run `ecsx.gen.aspect` for the remaining four aspects.
+Following the above pattern, run `mix ecsx.gen.aspect` for the remaining four aspects.
 
 Next we have to think about the Systems which will organize game logic.  What makes a Snake game work?
 
@@ -46,12 +48,14 @@ Next we have to think about the Systems which will organize game logic.  What ma
 
 Each one of these will be the responsibility of a different System:
 
+```
   ForwardMovement
   PlayerInput
   GrowTail
   Collision
+```
 
-We will generate modules for each of these Systems with `ecsx.gen.system`.  For example:
+We will generate modules for each of these Systems with `mix ecsx.gen.system`.  For example:
 
 ```console
   $ mix ecsx.gen.system ForwardMovement
