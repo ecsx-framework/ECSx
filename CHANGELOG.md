@@ -3,6 +3,7 @@
 ## Unreleased
 
 Improved generators to better handle code injection
+Generators now raise helpful error messages when missing arguments
 
 ## v0.1.1 (2022-07-21)
 
