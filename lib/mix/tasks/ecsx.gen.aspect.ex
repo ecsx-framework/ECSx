@@ -14,9 +14,31 @@ defmodule Mix.Tasks.Ecsx.Gen.Aspect do
   import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
 
   @doc false
+  def run([]) do
+    raise_with_help("Invalid arguments.")
+  end
+
+  def run([aspect_name]) do
+    raise_with_help("Invalid arguments - must provide at least one field name.")
+  end
+
   def run([aspect_name | _] = args) do
     create_aspect_file(args)
     inject_aspect_module_into_manager(aspect_name)
+  end
+
+  defp raise_with_help(message) do
+    Mix.raise("""
+    #{message}
+
+    mix ecsx.gen.aspect expects an aspect module name (in PascalCase), followed by
+    the field names (in snake_case).
+
+    For example:
+
+        mix ecsx.gen.aspect MyAspect entity_id value
+
+    """)
   end
 
   defp create_aspect_file([aspect_name | fields]) do

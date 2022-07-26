@@ -106,4 +106,12 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                """
     end)
   end
+
+  test "fails with missing argument" do
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      assert_raise(Mix.Error, fn ->
+        Mix.Tasks.Ecsx.Gen.System.run([])
+      end)
+    end)
+  end
 end

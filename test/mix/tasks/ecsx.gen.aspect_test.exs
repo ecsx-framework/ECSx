@@ -105,4 +105,18 @@ defmodule Mix.Tasks.Ecsx.Gen.AspectTest do
                """
     end)
   end
+
+  test "fails with invalid arguments" do
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      # Missing field names
+      assert_raise(Mix.Error, fn ->
+        Mix.Tasks.Ecsx.Gen.Aspect.run(["FooAspect"])
+      end)
+
+      # No arguments
+      assert_raise(Mix.Error, fn ->
+        Mix.Tasks.Ecsx.Gen.Aspect.run([])
+      end)
+    end)
+  end
 end

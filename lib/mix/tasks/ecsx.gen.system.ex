@@ -13,6 +13,19 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
 
   @doc false
+  def run([]) do
+    Mix.raise("""
+    Missing argument.
+
+    mix ecsx.gen.system expects a system module name (in PascalCase).
+
+    For example:
+
+        mix ecsx.gen.system MySystem
+
+    """)
+  end
+
   def run([system_name | _] = _args) do
     create_system_file(system_name)
     inject_system_module_into_manager(system_name)
