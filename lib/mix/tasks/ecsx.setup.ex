@@ -14,6 +14,9 @@ defmodule Mix.Tasks.Ecsx.Setup do
   use Mix.Task
   import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
 
+  @aspects_list "[\n      # MyApp.Aspects.SampleAspect\n    ]"
+  @systems_list "[\n      # MyApp.Systems.SampleSystem\n    ]"
+
   @doc false
   def run(args) do
     {opts, _, _} = OptionParser.parse(args, strict: [folders: :boolean])
@@ -40,7 +43,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
   defp create_manager do
     target = "lib/#{otp_app()}/manager.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/manager.ex")
-    binding = [app_name: root_module()]
+    binding = [app_name: root_module(), aspects_list: @aspects_list, systems_list: @systems_list]
 
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))
   end

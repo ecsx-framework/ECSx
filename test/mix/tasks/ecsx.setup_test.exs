@@ -3,39 +3,64 @@ Code.require_file("../../support/mix_helper.exs", __DIR__)
 defmodule Mix.Tasks.Ecsx.SetupTest do
   use ExUnit.Case
 
-  import ECSx.MixHelper, only: [clean_tmp_dir: 0]
+  import ECSx.MixHelper, only: [clean_tmp_dir: 0, sample_mixfile: 0]
 
-  setup_all do
+  setup do
     File.mkdir!("tmp")
     File.cd!("tmp")
     File.mkdir!("lib")
+    File.write!("mix.exs", sample_mixfile())
 
     on_exit(&clean_tmp_dir/0)
-
     :ok
   end
 
   test "generates manager and folders" do
-    Mix.Tasks.Ecsx.Setup.run([])
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      Mix.Tasks.Ecsx.Setup.run([])
 
-    manager_file = File.read!("lib/ecsx/manager.ex")
+      manager_file = File.read!("lib/my_app/manager.ex")
 
-    assert manager_file =~ "defmodule ECSx.Manager do"
-    assert manager_file =~ "@moduledoc \"\"\"\n  ECSx manager."
-    assert manager_file =~ "use ECSx.Manager, tick_rate: 20"
-    assert manager_file =~ "setup do"
-    assert manager_file =~ "def aspects do\n    [\n      ECSx.Aspects.SampleAspect"
-    assert manager_file =~ "def systems do\n    [\n      ECSx.Systems.SampleSystem"
+      assert manager_file ==
+               """
+               defmodule MyApp.Manager do
+                 @moduledoc \"\"\"
+                 ECSx manager.
+                 \"\"\"
+                 use ECSx.Manager, tick_rate: 20
 
-    assert File.dir?("lib/ecsx/aspects")
-    assert File.dir?("lib/ecsx/systems")
+                 setup do
+                   # Load your initial components
+                 end
+
+                 # Declare all valid Aspects
+                 def aspects do
+                   [
+                     # MyApp.Aspects.SampleAspect
+                   ]
+                 end
+
+                 # Declare all Systems to run
+                 def systems do
+                   [
+                     # MyApp.Systems.SampleSystem
+                   ]
+                 end
+               end
+               """
+
+      assert File.dir?("lib/my_app/aspects")
+      assert File.dir?("lib/my_app/systems")
+    end)
   end
 
   test "--no-folders option" do
-    Mix.Tasks.Ecsx.Setup.run(["--no-folders"])
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      Mix.Tasks.Ecsx.Setup.run(["--no-folders"])
 
-    assert File.exists?("lib/ecsx/manager.ex")
-    refute File.dir?("lib/ecsx/aspects")
-    refute File.dir?("lib/ecsx/systems")
+      assert File.exists?("lib/my_app/manager.ex")
+      refute File.dir?("lib/my_app/aspects")
+      refute File.dir?("lib/my_app/systems")
+    end)
   end
 end

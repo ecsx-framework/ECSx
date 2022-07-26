@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Improved generators to better handle code injection
+
 ## v0.1.1 (2022-07-21)
 
 Setup task `mix ecsx.setup` no longer generates sample modules

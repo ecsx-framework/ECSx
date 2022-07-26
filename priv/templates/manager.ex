@@ -10,15 +10,11 @@ defmodule <%= app_name %>.Manager do
 
   # Declare all valid Aspects
   def aspects do
-    [
-      <%= app_name %>.Aspects.SampleAspect
-    ]
+    <%= aspects_list %>
   end
 
   # Declare all Systems to run
   def systems do
-    [
-      <%= app_name %>.Systems.SampleSystem
-    ]
+    <%= systems_list %>
   end
 end
