@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## v.0.2.0 (2022-08-26)
 
+New Query API for fetching Components
 Improved generators to better handle code injection
 Generators now raise helpful error messages when missing arguments
 

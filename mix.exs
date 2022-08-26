@@ -2,7 +2,7 @@ defmodule ECSx.MixProject do
   use Mix.Project
 
   @gh_url "https://github.com/APB9785/ECSx"
-  @version "0.1.1"
+  @version "0.2.0"
 
   def project do
     [
@@ -42,7 +42,7 @@ defmodule ECSx.MixProject do
     [
       {:ex_doc, "~> 0.28", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.14.4", only: :test}
+      {:excoveralls, "~> 0.14", only: :test}
     ]
   end
 
