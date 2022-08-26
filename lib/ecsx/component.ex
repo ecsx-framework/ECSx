@@ -1,13 +1,16 @@
 defmodule ECSx.Component do
-  @moduledoc false
+  @moduledoc """
+  A Component labels an entity as possessing a particular Aspect, and holds the data
+  needed to model that Aspect.
 
-  # A Component labels an entity as possessing a particular aspect, and holds the data
-  # needed to model that aspect. Under the hood, we use ETS to store the Components
-  # in memory for quick retrieval via aspect and entity ID.
+  Under the hood, we use ETS to store the Components in memory for quick retrieval
+  via Aspect and Entity ID.
+  """
 
   @type t :: map
   @type value :: any
 
+  @doc false
   def add(aspect, attrs, fields) do
     row =
       fields
@@ -18,6 +21,7 @@ defmodule ECSx.Component do
     :ok
   end
 
+  @doc false
   def query_all(aspect, fields, []) do
     aspect
     |> :ets.tab2list()
@@ -33,6 +37,7 @@ defmodule ECSx.Component do
     parse_results(results, queries, fields)
   end
 
+  @doc false
   def query_one(aspect, fields, queries) do
     matches = Keyword.fetch!(queries, :match)
     pattern = make_pattern(fields, matches)
@@ -62,17 +67,20 @@ defmodule ECSx.Component do
     parsed_result
   end
 
+  @doc false
   def query_error(results, matches) do
     raise ECSx.QueryError,
       message: "query_one expects zero or one results, got #{length(results)}",
       matches: matches
   end
 
+  @doc false
   def remove(aspect, entity_id) do
     :ets.delete(aspect, entity_id)
     :ok
   end
 
+  @doc false
   def exists?(aspect, entity_id) do
     :ets.member(aspect, entity_id)
   end

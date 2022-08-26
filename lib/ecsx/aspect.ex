@@ -4,8 +4,8 @@ defmodule ECSx.Aspect do
 
   For example, if Entities in your application should have a "color" value, you will
   create an Aspect called `Color`.  This allows you to add a color Component to an Entity
-  with `add_component/1`, query the color value for a given Entity with `get_component/1`
-  or `get_value/2`, query all Entities which have a color value with `get_all/0`, remove
+  with `add_component/1`, query the color value for a given Entity with `query_one/1`,
+  query all Entities which have a color value with `query_all/1`, remove
   the color value from an Entity altogether with `remove_component/1`, or test whether
   an entity has a color with `has_component?/1`.
 
@@ -54,7 +54,7 @@ defmodule ECSx.Aspect do
 
   The standard way to fetch the Component(s) from an Entity is using a Query.  Each aspect
   provides two Query functions: `query_one/1` and `query_all/1`.  The former returns a single
-  value, and will raise an `ECSx.QueryError` if more than one result is found.  The latter
+  result, and will raise an `ECSx.QueryError` if more than one result is found.  The latter
   will return a list with any number of results.
 
   These Query functions have two possible parameters:
@@ -74,14 +74,14 @@ defmodule ECSx.Aspect do
       Color.query_one(match: [entity_id: entity_id], value: :hue)
       300
 
-      Color.query_many()
+      Color.query_all()
       [%{entity_id: entity_id, ...}, %{...}, ...]
 
-      Color.query_many(value: :entity_id)
+      Color.query_all(value: :entity_id)
       [entity_id, another_entity_id, ...]
 
   """
-  @type t :: atom
+  @type t :: module
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do

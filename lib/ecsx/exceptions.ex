@@ -1,6 +1,6 @@
 defmodule ECSx.QueryError do
   @moduledoc """
-  Raised at runtime when the query is invalid.
+  Raised at runtime when the Query is invalid.
   """
   defexception [:message]
 
