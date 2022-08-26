@@ -109,11 +109,6 @@ defmodule ECSx.Aspect do
   end
 
   @doc """
-  Initializes the ETS table to store all components of this aspect.
-  """
-  @callback init() :: :ok
-
-  @doc """
   Creates a new component.
 
   ## Example

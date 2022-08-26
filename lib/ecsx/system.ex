@@ -2,10 +2,10 @@ defmodule ECSx.System do
   @moduledoc """
   A fragment of game logic which reads and updates Components.
 
-  Every system must implement a `run` function.
+  Every System must implement a `run` function.
 
-  By default the system will run every game tick.  To use a longer period between runs,
-  you can pass the option `:period`.  For example, to set a system to run every 5 ticks:
+  By default, the System will run every game tick.  To use a longer period between runs,
+  you can pass the option `:period`.  For example, to set a System to run every 5 ticks:
 
       use ECSx.System,
         period: 5
@@ -22,5 +22,13 @@ defmodule ECSx.System do
     end
   end
 
+  @doc """
+  Invoked to run System logic.
+
+  This function will be called every `T` game ticks, where `T` is the value of
+  the System's `:period` option (defaults to 1).
+
+  Note:  A crash inside this function will restart the entire app!
+  """
   @callback run() :: :ok
 end

@@ -1,6 +1,6 @@
 defmodule ECSx.Component do
   @moduledoc """
-  A Component labels an entity as possessing a particular Aspect, and holds the data
+  A Component labels an entity as possessing a particular Aspect, and holds any data
   needed to model that Aspect.
 
   Under the hood, we use ETS to store the Components in memory for quick retrieval

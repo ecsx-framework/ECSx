@@ -5,11 +5,29 @@ defmodule ECSx.Manager do
   In an ECSx application, the Manager is responsible for:
 
     * starting up ETS tables for each Aspect, where the Components will be stored
+    * prepopulating the game content into memory
     * keeping track of the Systems to run, and their run order
     * configuring the tick rate for the application
     * running the Systems every tick
-    * validating and writing updates from the player clients
 
+  ## `:tick_rate` option
+
+  The `mix ecsx.setup` generator creates a Manager file with `:tick_rate` set to 20
+  (i.e. 20 ticks per second).  Feel free to change this number to fit the needs
+  of your application.
+
+  ## `aspects/0` and `systems/0`
+
+  Your Manager module must contain two zero-arity functions called `aspects` and `systems`
+  which return a list of all Aspects or Systems in your application.  The order of
+  the Aspects list is irrelevant, but the order of the Systems list is very important,
+  because the Systems are run consecutively in the given order.
+
+  ## `setup` block
+
+  Another important piece of the Manager module is the `setup` block.  Here you can load
+  all the necessary data for your app before any Systems run or users connect.  See `setup/1`
+  for more information.
   """
 
   defmacro __using__(opts) do
@@ -52,7 +70,36 @@ defmodule ECSx.Manager do
     end
   end
 
-  defmacro setup(do: contents) do
+  @doc """
+  Runs the given code block during startup.
+
+  The code will be run during the Manager's initialization (so pay special attention to the
+  position of `ECSx.Manager` in your application's supervision tree). The Aspect tables will
+  be created before `setup` is executed.
+
+  ## Example
+
+  ```
+  defmodule YourApp.Manager do
+    use ECSx.Manager
+
+    setup do
+      for npc <- YourApp.fetch_npc_spawn_info() do
+        Name.add_component(entity_id: npc.id, name: npc.name)
+        HitPoints.add_component(entity_id: npc.id, current: npc.hp, max: npc.hp)
+        Location.add_component(entity_id: npc.id, coords: npc.spawn_location)
+      end
+    end
+  end
+  ```
+
+  This setup will spawn each NPC with Components for Name, HitPoints, and Location.
+  """
+  defmacro setup(block) do
+    do_setup(block)
+  end
+
+  defp do_setup(do: contents) do
     quote do
       def handle_continue(:setup, state) do
         unquote(contents)
@@ -61,10 +108,12 @@ defmodule ECSx.Manager do
     end
   end
 
+  @doc false
   def start_link(module) do
     GenServer.start_link(module, [], name: module)
   end
 
+  @doc false
   def final_tick(systems) do
     systems
     |> Enum.map(fn system -> system.__period__() end)

@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
   @shortdoc "Generates manager process for ECSx"
 
   @moduledoc """
-  Generates the manager process which runs an ECSx application.
+  Generates the Manager process which runs an ECSx application.
 
       $ mix ecsx.setup
 
