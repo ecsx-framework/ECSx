@@ -6,6 +6,7 @@ defmodule ECSx.ManagerTest do
 
     ECSx.Manager.setup do
       :ets.insert(:test, {123, "foo"})
+      :ets.insert(:test, {456, "bar"})
     end
 
     def aspects, do: []
@@ -19,7 +20,9 @@ defmodule ECSx.ManagerTest do
       assert AppToSetup.handle_continue(:setup, "state") ==
                {:noreply, "state", {:continue, :start_systems}}
 
-      assert :ets.lookup(:test, 123) == [{123, "foo"}]
+      assert :test
+             |> :ets.tab2list()
+             |> Enum.sort() == [{123, "foo"}, {456, "bar"}]
     end
   end
 end
