@@ -5,118 +5,178 @@ Entity-Component-System architecture.  We're going to use the classic [Snake](ht
 
 ## Design plan
 
-First, let's start with a single entity.  In ECS, an entity is nothing by itself, so we must start by defining the aspects which will make up the entity.  What makes a Snake?
+In a classic Snake game, collision is everything.  We're going to need a game world where a snake
+can occupy many coordinates, and each one of those coordinates should be considered for collision.
+We also need to "order" each occupied coordinate in order to simulate movement - by adding to the
+head and removing from the tail.
 
-  * Has a physical position in the game world
-  * Moves forward constantly
-  * Can change direction
-  * Tail grows longer over time
-
-For each of these requirements, we will create an aspect:
-
-```
-  Position
-  Moving
-  Direction
-  Length
-```
-
-For each of these aspects, we'll define a schema which contains the ID of the entity, and any relevant data:
-
-  * Position: `{entity_id, x, y}` ex: `{123, 0, -50}`
-  * Moving: `{entity_id, speed}` ex: `{123, 1}`
-  * Direction: `{entity_id, direction}` ex: `{123, :north}`
-  * Length: `{entity_id, length}` ex: `{123, 10}`
-
-We can use the ECSx generators to quickly create the files needed for these aspects:
+Let's start by creating a `Coordinate` aspect:
 
 ```console
-  $ mix ecsx.gen.aspect Position entity_id x y
+  $ mix ecsx.gen.aspect Coordinate coordinate snake_id order
 ```
 
-Following the above pattern, run `mix ecsx.gen.aspect` for the remaining three aspects.
+We are declaring three fields in the schema, `coordinate`, `snake_id`, and `order`.  Normally,
+the first field of a schema is `entity_id`, which will give us efficient lookups on that field.
+However, this is a rare exception where lookup by `entity_id` is not very useful, and it is
+`coordinate` which will be the basis for our querying.  The id of the snake is still useful
+metadata, so we'll include that as the second field.  The third field is unique to our Snake game,
+where each coordinate represents just one link to a longer chain that is a snake.  We need to be
+able to know the first (head) and last (tail) coordinates, and we accomplish this through `order`.
+A coordinate with `order` 1 is the head, and a coordinate where `order` is equal to the total
+length of the snake, must be the tail.
 
-Next we have to think about the Systems which will organize game logic.  What makes a Snake game work?
+Since we know that snake length will be useful data, let's create another Aspect for it:
+
+```console
+  $ mix ecsx.gen.aspect Length snake_id length
+```
+
+This is a standard Aspect where we will query its Components by `snake_id`, so that should be
+the first field.
+
+Next we can also anticipate needing to label snakes with a `Direction` of movement:
+
+```console
+  $ mix ecsx.gen.aspect Direction snake_id direction
+```
+
+Now that we have modeled world data and snake data, let's think about the Systems which will
+organize game logic.  What makes a Snake game work?
 
   * Snakes move forwards every game tick
   * Snakes get longer over time (or based on other game conditions)
-  * When a collision is detected, one or both snakes are removed from the game
+  * When there is a collision, one or both snakes are removed from the game
 
-Each one of these will be the responsibility of a different System:
-
-```
-  ForwardMovement
-  GrowTail
-  Collision
-```
-
-We will generate modules for each of these Systems with `mix ecsx.gen.system`.  For example:
+Let's start with the most important System - the physics.  We'll call it `Driver`:
 
 ```console
-  $ mix ecsx.gen.system ForwardMovement
+  $ mix ecsx.gen.system Driver
 ```
 
-After generating all three of our Systems, it's time to write the game logic for each one.  Head over to `lib/your_app/systems`, where your recently-generated Systems are waiting.  We'll start with `forward_movement.ex`:
+Heading over to the generated file `lib/your_app/systems/driver.ex` and we'll add some code:
 
 ```elixir
-defmodule YourApp.Systems.ForwardMovement do
+defmodule YourApp.Systems.Driver do
   ...
-  alias YourApp.Aspects.Direction
   alias YourApp.Aspects.Moving
   alias YourApp.Aspects.Position
   ...
   def run do
-    # First we check entities for the aspect which triggers this system
-    moving = Moving.get_all()
+    # First we get all the Coordinate components
+    coordinates = Coordinate.query_all()
 
-    for %{entity_id: entity_id, speed: speed} <- moving do
-      # In addition to the speed, we need some additional data about the entity
-      %{direction: direction} = Direction.get_component(entity_id)
-      %{x: x, y: y} = Position.get_component(entity_id)
+    # Each coordinate will be appropriately updated to simulate the movement of the snakes
+    Enum.each(coordinates, &update_coordinate/1)
+  end
 
-      # Implementing this calculation is left as an exercise for the reader
-      {new_x, new_y} = calculate_new_position(x, y, speed, direction)
+  defp update_coordinate(%{coordinate: {x, y}, snake_id: id, order: 1} = component) do
+    # If the order is 1, then this is a head;  we need to occupy an adjacent coordinate.
+    # First let's find the direction this snake is headed
+    direction = Direction.query_one(match: [snake_id: id], value: :direction)
 
-      # Now we update the Position for the entity
-      Position.remove_component(entity_id)
-      Position.add_component(entity_id: entity_id, x: new_x, y: new_y)
+    # From this direction we need to calculate the coordinate we're moving into
+    new_coord = calculate_new_position(x, y, direction)
+
+    # Insert new head coordinate and increment the order of this one
+    Coordinate.add_component(coordinate: new_coord, snake_id: id, order: 1)
+    increment_order(component)
+  end
+
+  defp update_coordinate(%{coordinate: coordinate, snake_id: id, order: order} = component) do
+    # Since we know this isn't the head, we just need to check if it's the tail
+    length = Length.query_one(match: [snake_id: id], value: :length)
+
+    if length == order do
+      # This is the tail, we should un-occupy the coordinate as the snake moves out
+      Coordinate.remove_component(coordinate: coordinate, snake_id: id)
+    else
+      # All other coordinates in-between get their order incremented by one
+      increment_order(component)
     end
+  end
+
+  defp calculate_new_position(x, y, :north), do: {x, y + 1}
+  defp calculate_new_position(x, y, :east), do: {x + 1, y}
+  defp calculate_new_position(x, y, :south), do: {x, y - 1}
+  defp calculate_new_position(x, y, :west), do: {x - 1, y}
+
+  defp increment_order(%{coordinate: coordinate, snake_id: id, order: order}) do
+    Coordinate.remove_component(coordinate: coordinate, snake_id: id)
+    Coordinate.add_component(coordinate: coordinate, snake_id: id, order: order + 1)
   end
 end
 ```
 
-Let's skip the next system `GrowTail` for now and look at `Collision`.  Without tails growing, each snake is just a 1x1 "head", and if two heads collide, they will both be removed.  Let's add logic to `Collision.run/0` to handle this case:
+You probably noticed that this System creates new coordinates without checking if there is any
+collision with existing coordinates.  This is intentional;  to demonstrate why, imagine an
+example where Snake A is exiting a coordinate, and Snake B is entering the same coordinate,
+on the same server tick.  Now, if we check for collision in the `Driver` system, the result will
+depend on which Component gets updated first:
+
+  * If Snake A's tail Component is updated first, then the check will show the coordinate as
+    unoccupied, and there will be no collision.
+  * If Snake B's head Component is updated first, then the check will show the coordinate as
+    occupied by Snake A's tail, and there will be a collision.
+
+We want to avoid this kind of inconsistency, and ensure that the result is the same, regardless
+of which Component is stored earlier in the table.  Therefore we allow duplicate coordinates,
+and will have another System handle the cleanup afterwards.
+
+You've probably guessed that we'll start by running the generator:
+
+```console
+  $ mix ecsx.gen.system Collision
+```
+
+But before we start coding, let's think of a plan for how to efficiently check for collisions.
+One approach could be to fetch all the Coordinate Components, iterate over the list, grouping
+them by `{x, y}` pair, then iterate over the groups, checking if any have more than one member.
+This might be fine for some games, but if we want to optimize performance, we should only check
+for collision where there is actually a possibility of collision.  The only possible points of
+collision are those coordinates where there is a snake head (order 1).
+
+Then, in `lib/your_app/systems/collision.ex`:
 
 ```elixir
 defmodule YourApp.Systems.Collision do
   ...
   def run do
-    # Fetch position data for all snakes
-    snake_coordinates = Position.get_all()
+    # Fetch coordinates for all snake heads
+    possible_collision_coords = Coordinate.query_all(match: [order: 1])
+    # Update components for any entities which have collided
+    Enum.each(possible_collision_coords, &check_for_collision/1)
+  end
 
-    # Implementing this calculation is left as an exercise for the reader
-    duplicates = find_duplicates(snake_coordinates)
-
-    for %{entity_id: id, x: x, y: y} <- duplicates do
-      # When snakes crash, we can remove their components
-      Position.remove_component(id)
-      Moving.remove_component(id)
-      Direction.remove_component(id)
-      Length.remove_component(id)
-
-      # Without any components, the entity will cease to exist!
-      # Maybe we would like to keep some record of the entity instead:
-      CrashRecord.add_component(
-        entity_id: id,
-        crash_time: DateTime.utc_now(),
-        crash_location: {x, y}
-      )
+  defp check_for_collision(%{coordinate: coordinate, snake_id: id, order: order}) do
+    case Coordinate.query_all(match: [coordinate: coordinate]) do
+      [] -> :ok
+      [_] -> :ok
+      multiple_results -> Enum.each(multiple_results, &handle_collision/1)
     end
   end
+
+  defp handle_collision(%{coordinate: coordinate, snake_id: id, order: 1}) do
+    # When a snake head collides, it dies - we can remove its components
+    Position.remove_component(id)
+    Moving.remove_component(id)
+    Length.remove_component(id)
+
+    # Without any components, the entity will cease to exist!
+    # Maybe we would like to keep some record of the entity instead:
+    CrashRecord.add_component(
+      entity_id: id,
+      crash_time: DateTime.utc_now(),
+      crash_location: coordinate
+    )
+  end
+
+  # If the order is not 1, then the collision was on the snake's tail, and it will survive
+  defp handle_collision(_), do: :ok
 end
 ```
 
-Whenever we need a new Aspect (such as `CrashRecord`), we can run the generator again:
+Whenever we need a new Aspect (such as `CrashRecord`), we can simply run the generator again:
 
 ```console
   $ mix ecsx.gen.aspect CrashRecord entity_id crash_time crash_location
