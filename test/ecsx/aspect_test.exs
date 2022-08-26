@@ -9,7 +9,7 @@ defmodule ECSx.AspectTest do
 
       assert :ok == Couple.add_component(id: 11, foo: "Andy")
 
-      assert %{id: 11, foo: "Andy"} == Couple.get_component(11)
+      assert %{id: 11, foo: "Andy"} == Couple.query_one(match: [entity_id: 11])
 
       for {id, foo} <- [{1, "A"}, {2, "B"}, {3, "C"}],
           do: Couple.add_component(id: id, foo: foo)
@@ -22,7 +22,7 @@ defmodule ECSx.AspectTest do
       assert Couple.has_component?(2)
       assert Couple.has_component?(11)
 
-      all_couples = Couple.get_all()
+      all_couples = Couple.query_all()
 
       assert Enum.sort_by(all_couples, & &1.id) == [
                %{id: 1, foo: "A"},

@@ -8,7 +8,7 @@ defmodule ECSx.SystemTest do
 
     @impl ECSx.System
     def run do
-      couples = Couple.get_all()
+      couples = Couple.query_all()
 
       Enum.each(couples, fn %{id: id, foo: foo} ->
         Couple.remove_component(id)

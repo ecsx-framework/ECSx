@@ -5,6 +5,9 @@ defmodule ECSx.Component do
   # needed to model that aspect. Under the hood, we use ETS to store the Components
   # in memory for quick retrieval via aspect and entity ID.
 
+  @type t :: map
+  @type value :: any
+
   def add(aspect, attrs, fields) do
     row =
       fields
@@ -15,36 +18,54 @@ defmodule ECSx.Component do
     :ok
   end
 
-  def get_one(aspect, entity_id, fields) do
-    case :ets.lookup(aspect, entity_id) do
-      [] -> nil
-      [object] -> mapify(object, fields)
-    end
-  end
-
-  def get_many(aspect, entity_id, fields) do
-    aspect
-    |> :ets.lookup(entity_id)
-    |> Enum.map(&mapify(&1, fields))
-  end
-
-  def get_value(aspect, entity_id, selected_field, fields) do
-    case :ets.lookup(aspect, entity_id) do
-      [] -> nil
-      [object] -> parse_field(object, fields, selected_field)
-    end
-  end
-
-  def get_values(aspect, entity_id, selected_field, fields) do
-    aspect
-    |> :ets.lookup(entity_id)
-    |> Enum.map(&parse_field(&1, fields, selected_field))
-  end
-
-  def get_all(aspect, fields) do
+  def query_all(aspect, fields, []) do
     aspect
     |> :ets.tab2list()
     |> Enum.map(&mapify(&1, fields))
+  end
+
+  def query_all(aspect, fields, queries) do
+    matches = Keyword.fetch!(queries, :match)
+    pattern = make_pattern(fields, matches)
+
+    results = :ets.match_object(aspect, pattern)
+
+    parse_results(results, queries, fields)
+  end
+
+  def query_one(aspect, fields, queries) do
+    matches = Keyword.fetch!(queries, :match)
+    pattern = make_pattern(fields, matches)
+
+    case :ets.match_object(aspect, pattern) do
+      [] -> nil
+      [result] -> parse_one(result, queries, fields)
+      results -> query_error(results, matches)
+    end
+  end
+
+  defp make_pattern(fields, matches) do
+    fields
+    |> Enum.map(&Keyword.get(matches, &1, :_))
+    |> List.to_tuple()
+  end
+
+  defp parse_results(results, queries, fields) when is_list(results) do
+    case Keyword.get(queries, :value, nil) do
+      nil -> Enum.map(results, &mapify(&1, fields))
+      field -> Enum.map(results, &parse_field(&1, fields, field))
+    end
+  end
+
+  defp parse_one(result, queries, fields) do
+    [parsed_result] = parse_results([result], queries, fields)
+    parsed_result
+  end
+
+  def query_error(results, matches) do
+    raise ECSx.QueryError,
+      message: "query_one expects zero or one results, got #{length(results)}",
+      matches: matches
   end
 
   def remove(aspect, entity_id) do

@@ -28,19 +28,52 @@ defmodule ECSx.ComponentTest do
     end
   end
 
-  describe "#get_one/3" do
+  describe "#query_one/3" do
     setup :setup_set
 
     test "when component exists" do
       :ets.insert(:sample_aspect, {123, "test", "sample"})
 
-      component = Component.get_one(:sample_aspect, 123, @sample_fields)
+      component = Component.query_one(:sample_aspect, @sample_fields, match: [id: 123])
 
       assert component == %{id: 123, foo: "test", bar: "sample"}
     end
 
     test "when component does not exist" do
-      assert Component.get_one(:sample_aspect, 123, @sample_fields) == nil
+      assert Component.query_one(:sample_aspect, @sample_fields, match: [id: 123]) == nil
+    end
+
+    test "with value query" do
+      :ets.insert(:sample_aspect, {123, "test", "sample"})
+
+      foo = Component.query_one(:sample_aspect, @sample_fields, match: [id: 123], value: :foo)
+      bar = Component.query_one(:sample_aspect, @sample_fields, match: [id: 123], value: :bar)
+
+      assert foo == "test"
+      assert bar == "sample"
+    end
+
+    test "value query ignored when no results are found" do
+      foo = Component.query_one(:sample_aspect, @sample_fields, match: [id: 456], value: :foo)
+      bar = Component.query_one(:sample_aspect, @sample_fields, match: [id: 456], value: :bar)
+
+      assert foo == nil
+      assert bar == nil
+    end
+
+    test "raises if multiple results are found" do
+      :ets.insert(:sample_aspect, {123, "test", "sample"})
+      :ets.insert(:sample_aspect, {456, "test", "dos"})
+
+      message = """
+      query_one expects zero or one results, got 2 from query:
+
+      [foo: \"test\"]
+      """
+
+      assert_raise ECSx.QueryError, message, fn ->
+        Component.query_one(:sample_aspect, @sample_fields, match: [foo: "test"])
+      end
     end
   end
 
@@ -51,56 +84,40 @@ defmodule ECSx.ComponentTest do
       :ets.insert(:sample_aspect, {123, "test", "sample"})
       :ets.insert(:sample_aspect, {123, "numero", "dos"})
 
-      assert Component.get_many(:sample_aspect, 123, @sample_fields) == [
+      assert Component.query_all(:sample_aspect, @sample_fields, match: [id: 123]) == [
                %{id: 123, foo: "test", bar: "sample"},
                %{id: 123, foo: "numero", bar: "dos"}
              ]
     end
 
     test "for zero components" do
-      assert Component.get_many(:sample_aspect, 456, @sample_fields) == []
-    end
-  end
-
-  describe "#get_value/4" do
-    setup :setup_set
-
-    test "when component exists" do
-      :ets.insert(:sample_aspect, {123, "test", "sample"})
-
-      assert Component.get_value(:sample_aspect, 123, :foo, @sample_fields) == "test"
-      assert Component.get_value(:sample_aspect, 123, :bar, @sample_fields) == "sample"
+      assert Component.query_all(:sample_aspect, @sample_fields, match: [id: 123]) == []
     end
 
-    test "for zero components" do
-      assert Component.get_value(:sample_aspect, 456, :foo, @sample_fields) == nil
-    end
-  end
-
-  describe "#get_values/4" do
-    setup :setup_bag
-
-    test "when components exist" do
+    test "with value query" do
       :ets.insert(:sample_aspect, {123, "test", "sample"})
       :ets.insert(:sample_aspect, {123, "numero", "dos"})
 
-      assert Component.get_values(:sample_aspect, 123, :foo, @sample_fields) == ["test", "numero"]
-      assert Component.get_values(:sample_aspect, 123, :bar, @sample_fields) == ["sample", "dos"]
+      foos = Component.query_all(:sample_aspect, @sample_fields, match: [id: 123], value: :foo)
+      bars = Component.query_all(:sample_aspect, @sample_fields, match: [id: 123], value: :bar)
+
+      assert foos == ["test", "numero"]
+      assert bars == ["sample", "dos"]
     end
 
-    test "for zero components" do
-      assert Component.get_values(:sample_aspect, 456, :foo, @sample_fields) == []
+    test "value query ignored when no results are found" do
+      foos = Component.query_all(:sample_aspect, @sample_fields, match: [id: 456], value: :foo)
+      bars = Component.query_all(:sample_aspect, @sample_fields, match: [id: 456], value: :bar)
+
+      assert foos == []
+      assert bars == []
     end
-  end
 
-  describe "#get_all/2" do
-    setup :setup_set
-
-    test "when components exist" do
+    test "no query returns all components" do
       :ets.insert(:sample_aspect, {123, "test", "sample"})
       :ets.insert(:sample_aspect, {456, "numero", "dos"})
 
-      components = Component.get_all(:sample_aspect, @sample_fields)
+      components = Component.query_all(:sample_aspect, @sample_fields, [])
 
       assert components == [
                %{id: 456, foo: "numero", bar: "dos"},
@@ -108,8 +125,8 @@ defmodule ECSx.ComponentTest do
              ]
     end
 
-    test "for zero components" do
-      assert Component.get_all(:sample_aspect, @sample_fields) == []
+    test "no query on an empty table" do
+      assert Component.query_all(:sample_aspect, @sample_fields, []) == []
     end
   end
 

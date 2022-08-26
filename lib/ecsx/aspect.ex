@@ -50,38 +50,38 @@ defmodule ECSx.Aspect do
       DOT.add_component(entity_id: hero.id, damage_per_second: 10, type: :poison, source_id: spider.id)
       DOT.add_component(entity_id: hero.id, damage_per_second: 25, type: :fire, source_id: dragon.id)
 
-      DOT.get_component(hero.id)
-      [%{entity_id: ...}, %{...}]
+  ## `query_one/1` and `query_all/1`
 
-      DOT.get_value(hero.id, :damage_per_second)
-      [10, 25]
+  The standard way to fetch the Component(s) from an Entity is using a Query.  Each aspect
+  provides two Query functions: `query_one/1` and `query_all/1`.  The former returns a single
+  value, and will raise an `ECSx.QueryError` if more than one result is found.  The latter
+  will return a list with any number of results.
 
-  ## `get_component/1` and `get_value/2`
+  These Query functions have two possible parameters:
 
-  The standard way to fetch the component(s) from an Entity is using
-  `MyAspect.get_component(entity_id)`. If your `table_type` is `:set` or `:ordered_set`,
-  this function will return a single Component, or `nil` if the Entity does not have
-  that Aspect.  If the `table_type` is `:bag` or `:duplicate_bag`, then it will return
-  a list containing zero or more Components.
+    * `:match` - A keyword list of the fields and values for which to search.  If a `:match` is
+      not given, the entire Aspect table will be returned.
 
-  Each Component is represented by a map, using the keys provided by the schema.  If you only
-  want a single value from the Component, use `get_value/2`, passing the field name of the
-  desired value as the second argument.
+    * `:value` - By default, each Component returned by a Query will be in the form of a map,
+      using the keys provided by its Aspect schema.  If you only care about one field from the
+      Component, you can instead return unwrapped values with `value: :field_name`
 
   ### Examples
 
-      Color.get_component(entity_id)
+      Color.query_one(match: [entity_id: entity_id])
       %{entity_id: entity_id, hue: 300, saturation: 50, lightness: 45}
 
-      Color.get_value(entity_id, :hue)
+      Color.query_one(match: [entity_id: entity_id], value: :hue)
       300
 
-  """
+      Color.query_many()
+      [%{entity_id: entity_id, ...}, %{...}, ...]
 
-  @type t :: map
-  @type id :: any
-  @type value :: any
-  @type aspect :: atom
+      Color.query_many(value: :entity_id)
+      [entity_id, another_entity_id, ...]
+
+  """
+  @type t :: atom
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -98,21 +98,9 @@ defmodule ECSx.Aspect do
 
       def add_component(attrs), do: ECSx.Component.add(@table_name, attrs, @fields)
 
-      if @table_type in ~w(set ordered_set)a do
-        def get_component(entity_id),
-          do: ECSx.Component.get_one(@table_name, entity_id, @fields)
+      def query_one(query \\ []), do: ECSx.Component.query_one(@table_name, @fields, query)
 
-        def get_value(entity_id, field),
-          do: ECSx.Component.get_value(@table_name, entity_id, field, @fields)
-      else
-        def get_component(entity_id),
-          do: ECSx.Component.get_many(@table_name, entity_id, @fields)
-
-        def get_value(entity_id, field),
-          do: ECSx.Component.get_values(@table_name, entity_id, field, @fields)
-      end
-
-      def get_all, do: ECSx.Component.get_all(@table_name, @fields)
+      def query_all(query \\ []), do: ECSx.Component.query_all(@table_name, @fields, query)
 
       def remove_component(entity_id), do: ECSx.Component.remove(@table_name, entity_id)
 
@@ -136,19 +124,28 @@ defmodule ECSx.Aspect do
   @callback add_component(attrs :: Keyword.t()) :: :ok
 
   @doc """
-  Gets an existing component from the table, given its entity ID.
+  Query for a single component of this aspect with optional match conditions.
+
+  Raises if more than one component is returned.
+
+  Examples
+
+      # Get the Velocity component for entity 123
+      Velocity.query_one(match: [entity_id: 123])
+
   """
-  @callback get_component(entity_id :: any) :: t
+  @callback query_one(query :: Keyword.t()) :: ECSx.Component.t() | ECSx.Component.value()
 
   @doc """
-  Gets a single value from a component.
-  """
-  @callback get_value(entity_id :: any, field :: atom) :: value
+  Query for all components of this aspect with optional match conditions.
 
-  @doc """
-  Gets all existing components of this aspect.
+  Examples
+
+      # Get the ID of each entity with zero velocity in the x-y plane
+      Velocity.query_all(match: [vx: 0, vy: 0], value: :entity_id)
+
   """
-  @callback get_all() :: [t]
+  @callback query_all(query :: Keyword.t()) :: [ECSx.Component.t() | ECSx.Component.value()]
 
   @doc """
   Removes any existing components of this aspect from an entity.
