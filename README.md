@@ -15,7 +15,7 @@ small fragments called Components, which are then read and updated by Systems.
 ```elixir
 def deps do
   [
-    {:ecsx, "~> 0.1"}
+    {:ecsx, "~> 0.2"}
   ]
 end
 ```
