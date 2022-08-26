@@ -33,7 +33,7 @@ defmodule ECSx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger, :eex]
+      extra_applications: [:logger, :eex, :mix]
     ]
   end
 
@@ -41,6 +41,7 @@ defmodule ECSx.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.28", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.14.4", only: :test}
     ]
   end
