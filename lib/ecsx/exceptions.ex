@@ -6,12 +6,10 @@ defmodule ECSx.QueryError do
 
   def exception(opts) do
     message = Keyword.fetch!(opts, :message)
-    query = Keyword.fetch!(opts, :matches)
+    entity_id = Keyword.fetch!(opts, :entity_id)
 
     message = """
-    #{message} from query:
-
-    #{inspect(query)}
+    #{message} from entity ID #{inspect(entity_id)}
     """
 
     %__MODULE__{message: message}

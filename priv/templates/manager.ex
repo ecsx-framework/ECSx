@@ -8,9 +8,9 @@ defmodule <%= app_name %>.Manager do
     # Load your initial components
   end
 
-  # Declare all valid Aspects
-  def aspects do
-    <%= aspects_list %>
+  # Declare all valid Component types
+  def components do
+    <%= components_list %>
   end
 
   # Declare all Systems to run

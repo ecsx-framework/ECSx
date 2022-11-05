@@ -85,9 +85,9 @@ defmodule ECSx.Manager do
 
     setup do
       for npc <- YourApp.fetch_npc_spawn_info() do
-        Name.add_component(entity_id: npc.id, name: npc.name)
-        HitPoints.add_component(entity_id: npc.id, current: npc.hp, max: npc.hp)
-        Location.add_component(entity_id: npc.id, coords: npc.spawn_location)
+        Name.add_component(npc.id, npc.name)
+        HitPoints.add_component(npc.id, npc.hp)
+        Location.add_component(npc.id, npc.spawn_location)
       end
     end
   end

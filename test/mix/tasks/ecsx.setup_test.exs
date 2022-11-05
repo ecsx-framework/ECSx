@@ -33,10 +33,10 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
                    # Load your initial components
                  end
 
-                 # Declare all valid Aspects
-                 def aspects do
+                 # Declare all valid Component types
+                 def components do
                    [
-                     # MyApp.Aspects.SampleAspect
+                     # MyApp.Components.SampleComponent
                    ]
                  end
 
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
                end
                """
 
-      assert File.dir?("lib/my_app/aspects")
+      assert File.dir?("lib/my_app/components")
       assert File.dir?("lib/my_app/systems")
     end)
   end
@@ -59,7 +59,7 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
       Mix.Tasks.Ecsx.Setup.run(["--no-folders"])
 
       assert File.exists?("lib/my_app/manager.ex")
-      refute File.dir?("lib/my_app/aspects")
+      refute File.dir?("lib/my_app/components")
       refute File.dir?("lib/my_app/systems")
     end)
   end
