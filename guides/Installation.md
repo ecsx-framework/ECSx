@@ -37,7 +37,7 @@ To use the ECSx framework in your application, it should be added to the list of
 ```
 defp deps do
   [
-    {:ecsx, "~> 0.1"}
+    {:ecsx, "~> 0.2"}
   ]
 end
 ```
