@@ -18,9 +18,9 @@ defmodule ECSx.MixHelper do
   end
   """
 
-  @aspects_list """
+  @components_list """
   [
-    # MyApp.Aspects.SampleAspect
+    # MyApp.Components.SampleComponent
   ]
   """
 
@@ -37,7 +37,7 @@ defmodule ECSx.MixHelper do
 
     File.mkdir!("lib")
     File.mkdir!("lib/my_app")
-    File.mkdir!("lib/my_app/aspects")
+    File.mkdir!("lib/my_app/components")
     File.write!("mix.exs", @sample_mixfile)
 
     source = Application.app_dir(:ecsx, "/priv/templates/manager.ex")
@@ -45,7 +45,7 @@ defmodule ECSx.MixHelper do
     content =
       EEx.eval_file(source,
         app_name: "MyApp",
-        aspects_list: @aspects_list,
+        components_list: @components_list,
         systems_list: @systems_list
       )
 

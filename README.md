@@ -41,36 +41,35 @@ end
 
 Everything in your application is an Entity, but in ECS you won't work with these
 Entities directly - instead you will work directly with the individual attributes
-that an Entity might have.  These attributes are called Aspects, and they are given
-to an Entity by creating a Component, which holds, at minimum, the Entity's
-unique ID, but also any extra data which is relevant to that Aspect.  For example:
+that an Entity might have.  These attributes are given to an Entity by creating a Component,
+which holds, at minimum, the Entity's unique ID, but also can store a value.  For example:
 
-* You're running a simulation of cars on a highway
+* You're running a 2-dimensional simulation of cars on a highway
 * Each car gets its own `entity_id` e.g. `123`
-* If the car with ID 123 is blue, we give it the `Color` Aspect, stored as a `{123, "blue"}` Component
-* If the same car is moving west at 60mph, we might model this with a `Moving` Aspect, stored as a `{123, 60, "west"}` Component
-* Another car with ID 135 might have the `Moving` Aspect with different data `{135, 30, "east"}`
-* These cars would also have `Location` which holds x, y, z coordinates: `{entity_id, x, y, z}`
+* If the car with ID `123` is blue, we give it a `Color` Component with value `"blue"`
+* If the same car is moving west at 60mph, we might model this with a `Direction` Component with value `"west"` and a `Speed` Component with value `60`
+* The car would also have Components such as `XCoordinate` and `YCoordinate` to locate it
+  on the map
 
 ### Systems
 
-Once your data is modeled using Components to associate different Aspects to your Entities,
-you'll create Systems to operate on them.  For example:
+Once your Entities are modeled using Components, you'll create Systems to operate on them.
+For example:
 
-* Entities with the `Moving` Aspect should have their locations regularly updated according to the speed and direction
-* We can create a `Move` System which reads the `Moving` Component, calculates how far the car has moved since the last server tick, and updates the Entity's `Location` Component accordingly.
-* The System will run every tick, only considering Entities which have the `Moving` Aspect
+* Entities with `Speed` Components should have their locations regularly updated according to the speed and direction
+* We can create a `Move` System which reads the `Speed` and `Direction` Components, calculates how far the car has moved since the last server tick, and updates the Entity's `XCoordinate` and/or `YCoordinate` Component accordingly.
+* The System will run every tick, only considering Entities which have a `Speed` Component
 
 ### Generators
 
-ECSx comes with generators to quickly create new Aspects or Systems:
+ECSx comes with generators to quickly create new Components or Systems:
 
-* `mix ecsx.gen.aspect`
+* `mix ecsx.gen.component`
 * `mix ecsx.gen.system`
 
 ### Manager
 
-Every ECSx application requires a Manager module, where valid Aspects and Systems are declared,
+Every ECSx application requires a Manager module, where valid Component types and Systems are declared,
 as well as the setup to spawn world objects before any players join.  This module is created for
 you during `mix ecsx.setup` and will be automatically updated by the other generators.
 

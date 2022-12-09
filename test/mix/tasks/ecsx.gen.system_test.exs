@@ -51,10 +51,10 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                    # Load your initial components
                  end
 
-                 # Declare all valid Aspects
-                 def aspects do
+                 # Declare all valid Component types
+                 def components do
                    [
-                     # MyApp.Aspects.SampleAspect
+                     # MyApp.Components.SampleComponent
                    ]
                  end
 
@@ -88,10 +88,10 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                    # Load your initial components
                  end
 
-                 # Declare all valid Aspects
-                 def aspects do
+                 # Declare all valid Component types
+                 def components do
                    [
-                     # MyApp.Aspects.SampleAspect
+                     # MyApp.Components.SampleComponent
                    ]
                  end
 
