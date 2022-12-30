@@ -1,6 +1,6 @@
 # ECS Design
 
-### Entities, Aspects, and Components
+### Entities and Components
 
 Everything in your application is an Entity, but in ECS you won't work with these
 Entities directly - instead you will work with the individual attributes that an Entity

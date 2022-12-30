@@ -108,9 +108,9 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
 
   test "fails with invalid arguments" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
-      # Missing field names
+      # Missing argument
       # assert_raise(Mix.Error, fn ->
-      #   Mix.Tasks.Ecsx.Gen.Component.run(["FooAspect"])
+      #   Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent"])
       # end)
 
       # No arguments

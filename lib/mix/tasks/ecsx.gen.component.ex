@@ -48,7 +48,6 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     filename = Macro.underscore(component_type)
     target = "lib/#{otp_app()}/components/#{filename}.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
-    # TODO: accept unique opt
     binding = [app_name: root_module(), unique: true, component_type: component_type]
 
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))

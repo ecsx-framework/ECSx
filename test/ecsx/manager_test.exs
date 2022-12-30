@@ -9,7 +9,7 @@ defmodule ECSx.ManagerTest do
       :ets.insert(:test, {456, "bar"})
     end
 
-    def aspects, do: []
+    def components, do: []
     def systems, do: []
   end
 

@@ -7,9 +7,8 @@ defmodule ECSx.Tag do
     quote bind_quoted: [opts: opts] do
       @behaviour ECSx.Tag
 
-      # TODO: what if table_type is invalid?
-      @table_type opts[:table_type] || :set
-      @table_name opts[:table_name] || __MODULE__
+      @table_type :set
+      @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)

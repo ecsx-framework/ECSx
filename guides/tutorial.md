@@ -2,9 +2,9 @@
 
 Now that we have an Elixir project with Phoenix, we can get started on building a game with Entity-Component-System architecture. In our game, each player will control a ship, which can sail around the map, and will attack enemies if they come too close.
 
-> Note: This guide will get you up-and-running with a working game, but it is
-intentionally generic.  Feel free to experiment with altering details from
-this implementation to customize your own game.
+> Note: This guide will get you up-and-running with a working game, but it is intentionally generic.  Feel free to experiment with altering details from this implementation to customize your own game.
+
+## Defining Component Types
 
 First let's consider the basic properties of a ship:
 
@@ -34,7 +34,9 @@ Let's start by creating components for each one of these:
 
 For now, this is all we need to do.  The ECSx generator has automatically set you up with modules for each component type, complete with a simple interface for handling the components.  We'll get more into that later.
 
-For now, having set up the components which will model our game data, let's think about the Systems which will organize game logic.  What makes our game work?
+## Creating Systems
+
+Having set up the components which will model our game data, let's think about the Systems which will organize game logic.  What makes our game work?
 
   * Ships change position based on velocity
   * Ships target other ships for attack when they are within range
@@ -235,6 +237,8 @@ end
 
 In this example we remove all of the entity's components, then add a new DestroyedAt component with the current timestamp.  If we wanted some components to persist - such as the position and/or velocity, so the wreckage could still be visible on the player displays - we could keep them around and possibly have another system clean them up later on.  Likewise if there were other components to add, such as a `RespawnTimer` or `FinalScore`, we could add them here as well.
 
+## Initializing Components
+
 By now you might be wondering "How did those components get created in the first place?"  We have code for adding `AttackCooldown` and `DestroyedAt`, when needed, but the basic components for the ships still need to be added before the game can even start.  For that, we'll check out `lib/my_app/manager.ex`:
 
 ```elixir
@@ -281,4 +285,6 @@ end
 
 Now when the server starts, there will be four ships set up and ready to go.
 
-Coming soon - I/O, display
+## Coming Soon
+
+I/O, display

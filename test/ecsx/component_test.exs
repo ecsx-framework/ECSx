@@ -4,7 +4,7 @@ defmodule ECSx.ComponentTest do
   alias ECSx.TestComponent
 
   describe "__using__" do
-    test "generates functions for an aspect" do
+    test "generates functions for a component type" do
       assert :ok == TestComponent.init()
 
       assert :ok == TestComponent.add(11, "Andy")

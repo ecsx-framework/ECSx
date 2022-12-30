@@ -16,7 +16,7 @@ defmodule ECSx.Component do
 
   Each Component type should have its own module, where it can be optionally configured.
 
-      defmodule MyApp.Aspects.Color do
+      defmodule MyApp.Components.Color do
         use ECSx.Component,
           unique: true
       end
@@ -38,9 +38,8 @@ defmodule ECSx.Component do
     quote bind_quoted: [opts: opts] do
       @behaviour ECSx.Component
 
-      # TODO: what if table_type is invalid?
-      @table_type opts[:table_type] || :set
-      @table_name opts[:table_name] || __MODULE__
+      @table_type if Keyword.get(opts, :unique, true), do: :set, else: :bag
+      @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
@@ -125,7 +124,7 @@ defmodule ECSx.Component do
   @callback search(value :: value) :: [id]
 
   @doc """
-  Removes any existing components of this aspect from an entity.
+  Removes any existing components of this type from an entity.
   """
   @callback remove(entity :: id) :: :ok
 
