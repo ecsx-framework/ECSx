@@ -289,7 +289,11 @@ This system will check the cooldowns on each game tick, removing them as soon as
 Next let's handle what happens when a ship has its HP reduced to zero or less:
 
 ```console
-  $ mix ecsx.get.system Destruction
+  $ mix ecsx.gen.component DestroyedAt datetime
+```
+
+```console
+  $ mix ecsx.gen.system Destruction
 ```
 
 ```elixir
