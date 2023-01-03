@@ -1,16 +1,10 @@
 defmodule ECSx.Component do
   @moduledoc """
-  A Component labels an entity as having a certain attribute, and holds any data
-  needed to model that attribute.
+  A Component labels an entity as having a certain attribute, and holds any data needed to model that attribute.
 
-  For example, if Entities in your application should have a "color" value, you will
-  create a Component type called `Color`.  This allows you to add a color component to an
-  Entity with `add/2`, look up the color value for a given Entity with `get_one/1`,
-  get all Entities' color values with `get_all/1`, remove the color value from an Entity
-  altogether with `remove/1`, or test whether an entity has a color with `exists?/1`.
+  For example, if Entities in your application should have a "color" value, you will create a Component type called `Color`.  This allows you to add a color component to an Entity with `add/2`, look up the color value for a given Entity with `get_one/1`, get all Entities' color values with `get_all/1`, remove the color value from an Entity altogether with `remove/1`, or test whether an entity has a color with `exists?/1`.
 
-  Under the hood, we use ETS to store the Components in memory for quick retrieval
-  via Entity ID.
+  Under the hood, we use ETS to store the Components in memory for quick retrieval via Entity ID.
 
   ## Usage
 
@@ -18,16 +12,15 @@ defmodule ECSx.Component do
 
       defmodule MyApp.Components.Color do
         use ECSx.Component,
+          value: :binary,
           unique: true
       end
 
   ### Options
 
-    * `:unique` - When `true`, each entity may have, at most, one component of this type;
-      attempting to add another will overwrite the first.  When `false`, an entity may have
-      many components of this type.
-    * `:read_concurrency` - when `true`, enables read concurrency for this component table.
-      Only set this if you know what you're doing.  Defaults to `false`
+    * `:value` - The type of value which will be stored in this component type.  Valid types are: `:atom, :binary, :datetime, :float, :integer`
+    * `:unique` - When `true`, each entity may have, at most, one component of this type;  attempting to add another will overwrite the first.  When `false`, an entity may have many components of this type.
+    * `:read_concurrency` - when `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
 
   """
 
@@ -38,13 +31,46 @@ defmodule ECSx.Component do
     quote bind_quoted: [opts: opts] do
       @behaviour ECSx.Component
 
-      @table_type if Keyword.get(opts, :unique, true), do: :set, else: :bag
       @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
+      @valid_value_types ~w(atom binary datetime float integer)a
+
+      @table_type (case(Keyword.get(opts, :unique, true)) do
+                     true ->
+                       :set
+
+                     false ->
+                       :bag
+
+                     x ->
+                       raise(
+                         ArgumentError,
+                         "Invalid option for `unique` - expected boolean, got: #{inspect(x)}"
+                       )
+                   end)
+
+      # Sets up value type validation
+      case Keyword.fetch!(opts, :value) do
+        :integer ->
+          defguard ecsx_type_guard(value) when is_integer(value)
+
+        v when v in [:string, :binary] ->
+          defguard ecsx_type_guard(value) when is_binary(value)
+
+        :atom ->
+          defguard ecsx_type_guard(value) when is_atom(value)
+
+        :datetime ->
+          defguard ecsx_type_guard(value) when is_struct(value, DateTime)
+
+        _ ->
+          raise(TypeError, "Invalid value type:  Valid types are #{inspect(@valid_value_types)}")
+      end
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
 
-      def add(entity_id, value), do: ECSx.Base.add(@table_name, {entity_id, value})
+      def add(entity_id, value) when ecsx_type_guard(value),
+        do: ECSx.Base.add(@table_name, {entity_id, value})
 
       def get_one(key), do: ECSx.Base.get_one(@table_name, key)
 

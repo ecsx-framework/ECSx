@@ -72,8 +72,8 @@ defmodule ECSx.MixProject do
   defp extras do
     [
       "guides/installation.md",
-      "guides/tutorial.md",
-      "guides/ecs_design.md"
+      "guides/ecs_design.md",
+      "guides/tutorial.md"
     ]
   end
 end

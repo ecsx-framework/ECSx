@@ -3,10 +3,11 @@
 ## v0.3.0 (2022-12-29)
 
 Components are now stored as key-value pairs  
-Simplified API for working with Components  
-Aspects have been renamed to Component Types
-Added Tags: Component Types which don't store any value  
-Component `table_type` now toggled via `:unique` flag
+Component values now require a type declaration which is checked on insertions  
+Simplified API for working with components  
+Aspects have been renamed to Component Types  
+Added Tags: boolean component types which don't store any value  
+Component `table_type` now toggled via `:unique` flag  
 
 ## v0.2.0 (2022-08-26)
 

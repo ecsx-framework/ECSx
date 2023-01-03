@@ -1,31 +1,16 @@
-defmodule Mix.Tasks.Ecsx.Gen.Component do
-  @shortdoc "Generates a new ECSx Component type"
+defmodule Mix.Tasks.Ecsx.Gen.Tag do
+  @shortdoc "Generates a new ECSx Tag - a Component type which doesn't store any value"
 
   @moduledoc """
   Generates a new Component type for an ECSx application.
 
-      $ mix ecsx.gen.component Height integer
+      $ mix ecsx.gen.tag Attackable
 
-  The first argument is the name of the component, followed by the data type of the value.
-
-  Valid types for the component's value are:
-
-    * atom
-    * binary
-    * datetime
-    * float
-    * integer
-
-  By default, new component types are generated with `unique: true`, which allows an entity to have at most one component of this type at any given time.  To override this, use the `--no-unique` flag:
-
-      $ mix ecsx.gen.component Friendship binary --no-unique
-
+  The single argument is the name of the component.
   """
 
   use Mix.Task
   import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
-
-  @valid_value_types ~w(atom binary datetime float integer)
 
   @doc false
   def run([]) do
@@ -34,48 +19,29 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     |> Mix.raise()
   end
 
-  def run([_component_type]) do
-    "Invalid arguments - must provide value type. If you don't want to store a value, try `mix ecsx.gen.tag`"
-    |> message_with_help()
-    |> Mix.raise()
-  end
-
-  def run([component_type_name, value_type | opts]) do
-    value_type = validate(value_type)
-    {opts, _, _} = OptionParser.parse(opts, strict: [unique: :boolean])
-    create_component_file(component_type_name, value_type, opts)
-    inject_component_module_into_manager(component_type_name)
+  def run([tag_name | _]) do
+    create_component_file(tag_name)
+    inject_component_module_into_manager(tag_name)
   end
 
   defp message_with_help(message) do
     """
     #{message}
 
-    mix ecsx.gen.component expects a component module name (in PascalCase), followed by a valid value type.
+    mix ecsx.gen.tag expects a tag module name (in PascalCase).
 
     For example:
 
-        mix ecsx.gen.component MyComponentType binary
+        mix ecsx.gen.tag MyTag
 
     """
   end
 
-  defp validate(type) when type in @valid_value_types, do: String.to_atom(type)
-
-  defp validate(_),
-    do: Mix.raise("Invalid value type. Possible types are: #{inspect(@valid_value_types)}")
-
-  defp create_component_file(component_type_name, value_type, opts) do
-    filename = Macro.underscore(component_type_name)
+  defp create_component_file(tag_name) do
+    filename = Macro.underscore(tag_name)
     target = "lib/#{otp_app()}/components/#{filename}.ex"
-    source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
-
-    binding = [
-      app_name: root_module(),
-      unique: Keyword.get(opts, :unique, true),
-      component_type: component_type_name,
-      value: value_type
-    ]
+    source = Application.app_dir(:ecsx, "/priv/templates/tag.ex")
+    binding = [app_name: root_module(), tag_name: tag_name]
 
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))
   end
