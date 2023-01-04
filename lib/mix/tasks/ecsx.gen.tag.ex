@@ -2,7 +2,7 @@ defmodule Mix.Tasks.Ecsx.Gen.Tag do
   @shortdoc "Generates a new ECSx Tag - a Component type which doesn't store any value"
 
   @moduledoc """
-  Generates a new Component type for an ECSx application.
+  Generates a new ECSx Tag - a Component type which doesn't store any value.
 
       $ mix ecsx.gen.tag Attackable
 
