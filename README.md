@@ -68,7 +68,7 @@ It is especially important to consider the order of your Systems list.  The mana
 
 ## Tutorial Project
 
-Note: This tutorial project is a work-in-progress
+Note: This tutorial project is a work-in-progress  
 [Building a ship combat engine with ECSx in a Phoenix app](https://hexdocs.pm/ecsx/tutorial.html)
 
 ## License
