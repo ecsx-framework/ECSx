@@ -1,5 +1,5 @@
 defmodule ECSx.StringComponent do
   use ECSx.Component,
-    value: :string,
+    value: :binary,
     unique: true
 end
