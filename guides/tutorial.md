@@ -20,17 +20,15 @@ First let's consider the basic properties of a ship:
 
 Let's start by creating `integer` component types for each one of these, except AttackSpeed, which will use `float`:
 
-```console
-  $ mix ecsx.gen.component HullPoints integer
-  $ mix ecsx.gen.component ArmorRating integer
-  $ mix ecsx.gen.component AttackDamage integer
-  $ mix ecsx.gen.component AttackRange integer
-  $ mix ecsx.gen.component XPosition integer
-  $ mix ecsx.gen.component YPosition integer
-  $ mix ecsx.gen.component XVelocity integer
-  $ mix ecsx.gen.component YVelocity integer
-  $ mix ecsx.gen.component AttackSpeed float
-```
+    $ mix ecsx.gen.component HullPoints integer
+    $ mix ecsx.gen.component ArmorRating integer
+    $ mix ecsx.gen.component AttackDamage integer
+    $ mix ecsx.gen.component AttackRange integer
+    $ mix ecsx.gen.component XPosition integer
+    $ mix ecsx.gen.component YPosition integer
+    $ mix ecsx.gen.component XVelocity integer
+    $ mix ecsx.gen.component YVelocity integer
+    $ mix ecsx.gen.component AttackSpeed float
 
 For now, this is all we need to do.  The ECSx generator has automatically set you up with modules for each component type, complete with a simple interface for handling the components.  We'll see this in action soon.
 
@@ -47,9 +45,7 @@ Having set up the component types which will model our game data, let's think ab
 
 Let's start with changing position based on velocity.  We'll call it `Driver`:
 
-```console
-  $ mix ecsx.gen.system Driver
-```
+    $ mix ecsx.gen.system Driver
 
 Head over to the generated file `lib/my_app/systems/driver.ex` and we'll add some code:
 
@@ -107,16 +103,12 @@ The final attack requirement is that after a successful attack, the ship's weapo
 
 With this plan in place, let's go ahead and create the component types, starting with SeekingTarget.  Since the presence of this component alone fulfills its purpose, without the need to store additional data, this is the appropriate use-case for a `Tag`:
 
-```console
-  $ mix ecsx.gen.tag SeekingTarget
-```
+    $ mix ecsx.gen.tag SeekingTarget
 
 Once a target is found, the `AttackTarget` component will be needed, and this time a `Tag` will not be enough, because we need to store the ID of the target.  Likewise with `AttackCooldown`, which must store the timestamp of the cooldown's expiration.
 
-```console
-  $ mix ecsx.gen.component AttackTarget binary
-  $ mix ecsx.gen.component AttackCooldown datetime
-```
+    $ mix ecsx.gen.component AttackTarget binary
+    $ mix ecsx.gen.component AttackCooldown datetime
 
 > Note:  In our case, we're using binary IDs to represent Entities, and Elixir `DateTime` structs for cooldown expirations.  If you're planning on using different types, such as integer IDs for entities, or storing timestamps as integers, simply adjust the parameters accordingly.
 
@@ -147,9 +139,7 @@ end
 
 Now we're onto the Targeting system, which operates only on entities with the SeekingTarget component, checking the distance to all other ships, and comparing them to the entity's attack range.  When an enemy ship is found to be within range, we can remove SeekingTarget and replace it with an AttackTarget:
 
-```console
-  $ mix ecsx.gen.system Targeting
-```
+    $ mix ecsx.gen.system Targeting
 
 ```elixir
 defmodule MyApp.Systems.Targeting do
@@ -197,9 +187,7 @@ end
 
 The Attacking system will also check distance, but only to the target ship, in case it has moved out-of-range.  If not, we just need to check on the cooldown, and do the attack.
 
-```console
-  $ mix ecsx.gen.system Attacking
-```
+    $ mix ecsx.gen.system Attacking
 
 ```elixir
 defmodule MyApp.Systems.Attacking do
@@ -277,9 +265,7 @@ Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/
 
 Our attacking system will add a cooldown with an expiration timestamp, but the next step is to ensure the cooldown component is removed from the entity once the time is reached, so it can attack again.  For that, we'll create a `CooldownExpiration` system:
 
-```console
-  $ mix ecsx.gen.system CooldownExpiration
-```
+    $ mix ecsx.gen.system CooldownExpiration
 
 > Note: going forwards, aliases will be omitted from the examples to save space.  Don't forget to include the required aliases for your component types!
 
@@ -308,13 +294,9 @@ This system will check the cooldowns on each game tick, removing them as soon as
 
 Next let's handle what happens when a ship has its HP reduced to zero or less:
 
-```console
-  $ mix ecsx.gen.component DestroyedAt datetime
-```
+    $ mix ecsx.gen.component DestroyedAt datetime
 
-```console
-  $ mix ecsx.gen.system Destruction
-```
+    $ mix ecsx.gen.system Destruction
 
 ```elixir
 defmodule MyApp.Systems.Destruction do
@@ -389,7 +371,7 @@ setup do
     # First generate a unique ID to represent the new entity
     entity = Ecto.UUID.generate()
 
-     # Then use that ID to create the components which make up a ship    
+    # Then use that ID to create the components which make up a ship    
     ArmorRating.add(entity, 0)
     AttackDamage.add(entity, 5)
     AttackRange.add(entity, 10)
@@ -408,4 +390,4 @@ Now when the server starts, there will be four ships set up and ready to go.
 
 ## Coming Soon
 
-I/O, display
+User input, display

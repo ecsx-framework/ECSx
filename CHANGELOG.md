@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0 (2022-12-29)
+## v0.3.0 (2023-01-03)
 
 Components are now stored as key-value pairs  
 Component values now require a type declaration which is checked on insertions  
