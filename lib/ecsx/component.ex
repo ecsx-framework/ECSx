@@ -54,7 +54,10 @@ defmodule ECSx.Component do
         :integer ->
           defguard ecsx_type_guard(value) when is_integer(value)
 
-        v when v in [:string, :binary] ->
+        :float ->
+          defguard ecsx_type_guard(value) when is_float(value)
+
+        :binary ->
           defguard ecsx_type_guard(value) when is_binary(value)
 
         :atom ->
@@ -64,7 +67,10 @@ defmodule ECSx.Component do
           defguard ecsx_type_guard(value) when is_struct(value, DateTime)
 
         _ ->
-          raise(TypeError, "Invalid value type:  Valid types are #{inspect(@valid_value_types)}")
+          raise(
+            ArgumentError,
+            "Invalid value type:  Valid types are #{inspect(@valid_value_types)}"
+          )
       end
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)

@@ -42,8 +42,6 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
 
   defp inject_system_module_into_manager(system_name) do
     manager_path = "lib/#{otp_app()}/manager.ex"
-    Mix.shell().info([:green, "* injecting ", :reset, manager_path])
-
     {before_systems, after_systems, list} = parse_manager(manager_path)
 
     new_list =

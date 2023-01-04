@@ -18,19 +18,17 @@ First let's consider the basic properties of a ship:
   * X Velocity:  The speed at which the ship is moving, horizontally
   * Y Velocity:  The speed at which the ship is moving, vertically
 
-Let's start by creating integer component types for each one of these (feel free to use `float` type instead, if desired):
+Let's start by creating `integer` component types for each one of these, except AttackSpeed, which will use `float`:
 
-```console
-  $ mix ecsx.gen.component HullPoints integer
-  $ mix ecsx.gen.component ArmorRating integer
-  $ mix ecsx.gen.component AttackDamage integer
-  $ mix ecsx.gen.component AttackRange integer
-  $ mix ecsx.gen.component AttackSpeed integer
-  $ mix ecsx.gen.component XPosition integer
-  $ mix ecsx.gen.component YPosition integer
-  $ mix ecsx.gen.component XVelocity integer
-  $ mix ecsx.gen.component YVelocity integer
-```
+    $ mix ecsx.gen.component HullPoints integer
+    $ mix ecsx.gen.component ArmorRating integer
+    $ mix ecsx.gen.component AttackDamage integer
+    $ mix ecsx.gen.component AttackRange integer
+    $ mix ecsx.gen.component XPosition integer
+    $ mix ecsx.gen.component YPosition integer
+    $ mix ecsx.gen.component XVelocity integer
+    $ mix ecsx.gen.component YVelocity integer
+    $ mix ecsx.gen.component AttackSpeed float
 
 For now, this is all we need to do.  The ECSx generator has automatically set you up with modules for each component type, complete with a simple interface for handling the components.  We'll see this in action soon.
 
@@ -47,9 +45,7 @@ Having set up the component types which will model our game data, let's think ab
 
 Let's start with changing position based on velocity.  We'll call it `Driver`:
 
-```console
-  $ mix ecsx.gen.system Driver
-```
+    $ mix ecsx.gen.system Driver
 
 Head over to the generated file `lib/my_app/systems/driver.ex` and we'll add some code:
 
@@ -78,6 +74,9 @@ defmodule MyApp.Systems.Driver do
       new_y_position = y_position + y_velocity
       YPosition.add(entity, new_y_position)
     end
+
+    # run/0 should always return :ok
+    :ok
   end
 end
 ```
@@ -104,16 +103,12 @@ The final attack requirement is that after a successful attack, the ship's weapo
 
 With this plan in place, let's go ahead and create the component types, starting with SeekingTarget.  Since the presence of this component alone fulfills its purpose, without the need to store additional data, this is the appropriate use-case for a `Tag`:
 
-```console
-  $ mix ecsx.gen.tag SeekingTarget
-```
+    $ mix ecsx.gen.tag SeekingTarget
 
 Once a target is found, the `AttackTarget` component will be needed, and this time a `Tag` will not be enough, because we need to store the ID of the target.  Likewise with `AttackCooldown`, which must store the timestamp of the cooldown's expiration.
 
-```console
-  $ mix ecsx.gen.component AttackTarget binary
-  $ mix ecsx.gen.component AttackCooldown datetime
-```
+    $ mix ecsx.gen.component AttackTarget binary
+    $ mix ecsx.gen.component AttackCooldown datetime
 
 > Note:  In our case, we're using binary IDs to represent Entities, and Elixir `DateTime` structs for cooldown expirations.  If you're planning on using different types, such as integer IDs for entities, or storing timestamps as integers, simply adjust the parameters accordingly.
 
@@ -144,9 +139,7 @@ end
 
 Now we're onto the Targeting system, which operates only on entities with the SeekingTarget component, checking the distance to all other ships, and comparing them to the entity's attack range.  When an enemy ship is found to be within range, we can remove SeekingTarget and replace it with an AttackTarget:
 
-```console
-  $ mix ecsx.gen.system Targeting
-```
+    $ mix ecsx.gen.system Targeting
 
 ```elixir
 defmodule MyApp.Systems.Targeting do
@@ -160,9 +153,9 @@ defmodule MyApp.Systems.Targeting do
   alias MyApp.SystemUtils
 
   def run do
-    for entity <- SeekingTarget.get_all() do
-      attempt_target(entity)
-    end
+    entities = SeekingTarget.get_all()
+
+    Enum.each(entities, &attempt_target/1)
   end
 
   defp attempt_target(self) do
@@ -173,17 +166,16 @@ defmodule MyApp.Systems.Targeting do
   end 
 
   defp look_for_target(self) do
-      # For now, we're assuming anything which has HullPoints can be attacked
-      HullPoints.get_all()
-        # ... except your own ship!
-      |> Enum.reject(fn {possible_target, _hp} -> possible_target == self end)
-      |> Enum.find(fn {possible_target, _hp} ->
-          distance_between = SystemUtils.distance_between(possible_target, self)
-          range = AttackRange.get_one(self)
+    # For now, we're assuming anything which has HullPoints can be attacked
+    HullPoints.get_all()
+    # ... except your own ship!
+    |> Enum.reject(fn {possible_target, _hp} -> possible_target == self end)
+    |> Enum.find(fn {possible_target, _hp} ->
+      distance_between = SystemUtils.distance_between(possible_target, self)
+      range = AttackRange.get_one(self)
 
-          distance_between < range
-        end
-      end
+      distance_between < range
+    end)
   end
 
   defp add_target(self, target) do
@@ -195,9 +187,7 @@ end
 
 The Attacking system will also check distance, but only to the target ship, in case it has moved out-of-range.  If not, we just need to check on the cooldown, and do the attack.
 
-```console
-  $ mix ecsx.gen.system Attacking
-```
+    $ mix ecsx.gen.system Attacking
 
 ```elixir
 defmodule MyApp.Systems.Attacking do
@@ -211,15 +201,16 @@ defmodule MyApp.Systems.Attacking do
   alias MyApp.Components.AttackSpeed
   alias MyApp.Components.AttackTarget
   alias MyApp.Components.HullPoints
-  
+  alias MyApp.Components.SeekingTarget
+  alias MyApp.SystemUtils
   
   def run do
-    for {attacker, target} <- AttackTarget.get_all() do
-      attack_if_ready(attacker, target)
-    end
+    attack_targets = AttackTarget.get_all()
+
+    Enum.each(attack_targets, &attack_if_ready/1)
   end
 
-  defp attack_if_ready(self, target) do
+  defp attack_if_ready({self, target}) do
     cond do
       SystemUtils.distance_between(self, target) > AttackRange.get_one(self) ->
         # If the target ever leaves our attack range, we want to remove the AttackTarget
@@ -232,24 +223,38 @@ defmodule MyApp.Systems.Attacking do
         :noop
 
       :otherwise ->
-        do_attack(self, target)
+        deal_damage(self, target)
+        add_cooldown(self)
     end
   end
 
-  defp do_attack(self, target) do
-    damage = AttackDamage.get_one(self)
+  defp deal_damage(self, target) do
+    attack_damage = AttackDamage.get_one(self)
     # Assuming one armor rating always equals one damage
     reduction_from_armor = ArmorRating.get_one(target)
-    final_damage = damage - reduction_from_armor
+    final_damage_amount = attack_damage - reduction_from_armor
 
     target_current_hp = HullPoints.get_one(target)
-    target_new_hp = target_current_hp - final_damage
+    target_new_hp = target_current_hp - final_damage_amount
 
     HullPoints.add(target, target_new_hp)
+  end
 
-    attack_speed = AttackSpeed.get_one(self)
-    cooldown_until = DateTime.utc_now() + attack_speed
+  defp add_cooldown(self) do
+    now = DateTime.utc_now()
+    ms_between_attacks = calculate_cooldown_time(self)
+    cooldown_until = DateTime.add(now, ms_between_attacks, :millisecond)
+
     AttackCooldown.add(self, cooldown_until)
+  end
+
+  # We're going to model AttackSpeed with a float representing attacks per second.
+  # The goal here is to convert that into milliseconds per attack.
+  defp calculate_cooldown_time(self) do
+    attacks_per_second = AttackSpeed.get_one(self)
+    seconds_per_attack = 1 / attacks_per_second
+
+    ceil(seconds_per_attack * 1000)
   end
 end
 ```
@@ -260,9 +265,7 @@ Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/
 
 Our attacking system will add a cooldown with an expiration timestamp, but the next step is to ensure the cooldown component is removed from the entity once the time is reached, so it can attack again.  For that, we'll create a `CooldownExpiration` system:
 
-```console
-  $ mix ecsx.gen.system CooldownExpiration
-```
+    $ mix ecsx.gen.system CooldownExpiration
 
 > Note: going forwards, aliases will be omitted from the examples to save space.  Don't forget to include the required aliases for your component types!
 
@@ -271,12 +274,15 @@ defmodule MyApp.Systems.CooldownExpiration do
   ...
   def run do
     now = DateTime.utc_now()
+    cooldowns = AttackCooldown.get_all()
+      
+    Enum.each(cooldowns, &remove_when_expired(&1, now))
+  end
 
-    for {entity, timestamp} <- AttackCooldown.get_all() do
-      case DateTime.compare(now, timestamp) do
-        :lt -> :noop
-        _ -> AttackCooldown.remove(entity)
-      end
+  defp remove_when_expired({entity, timestamp}, now) do
+    case DateTime.compare(now, timestamp) do
+      :lt -> :noop
+      _ -> AttackCooldown.remove(entity)
     end
   end
 end
@@ -288,21 +294,19 @@ This system will check the cooldowns on each game tick, removing them as soon as
 
 Next let's handle what happens when a ship has its HP reduced to zero or less:
 
-```console
-  $ mix ecsx.gen.component DestroyedAt datetime
-```
+    $ mix ecsx.gen.component DestroyedAt datetime
 
-```console
-  $ mix ecsx.gen.system Destruction
-```
+    $ mix ecsx.gen.system Destruction
 
 ```elixir
 defmodule MyApp.Systems.Destruction do
   ...
   def run do
-    for {entity, hp} <- HullPoints.get_all() do
+    ships = HullPoints.get_all()
+
+    Enum.each(ships, fn {entity, hp} ->
       if hp <= 0, do: destroy(entity)
-    end
+    end)
   end
 
   defp destroy(entity) do
@@ -322,7 +326,7 @@ defmodule MyApp.Systems.Destruction do
     # when a ship is destroyed, other ships should stop targeting it
     untarget(entity)
 
-    DestroyedAt.add(entity, DateTime.utc_now()
+    DestroyedAt.add(entity, DateTime.utc_now())
   end
 
   defp untarget(target) do
@@ -367,13 +371,13 @@ setup do
     # First generate a unique ID to represent the new entity
     entity = Ecto.UUID.generate()
 
-     # Then use that ID to create the components which make up a ship    
+    # Then use that ID to create the components which make up a ship    
     ArmorRating.add(entity, 0)
     AttackDamage.add(entity, 5)
     AttackRange.add(entity, 10)
-    AttackSpeed.add(entity, 1000)
-    AttackTarget.add(entity, nil)
+    AttackSpeed.add(entity, 1.05)
     HullPoints.add(entity, 50)
+    SeekingTarget.add(entity)
     XPosition.add(entity, Enum.random(1..100))
     XVelocity.add(entity, 0)
     YPosition.add(entity, Enum.random(1..100))
@@ -386,4 +390,4 @@ Now when the server starts, there will be four ships set up and ready to go.
 
 ## Coming Soon
 
-I/O, display
+User input, display
