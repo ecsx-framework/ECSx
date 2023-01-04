@@ -30,9 +30,9 @@ defmodule ECSx.BaseTest do
       :ets.insert(:nonunique_component, {123, "uno"})
       :ets.insert(:nonunique_component, {123, "dos"})
 
-      message = "get_one expects zero or one results, got 2 from entity ID 123\n"
+      message = "get_one expects zero or one results, got 2 from entity 123\n"
 
-      assert_raise ECSx.QueryError, message, fn ->
+      assert_raise ECSx.MultipleResultsError, message, fn ->
         Base.get_one(:nonunique_component, 123)
       end
     end

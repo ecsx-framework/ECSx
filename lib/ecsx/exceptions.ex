@@ -1,7 +1,4 @@
-defmodule ECSx.QueryError do
-  @moduledoc """
-  Raised at runtime when the Query is invalid.
-  """
+defmodule ECSx.MultipleResultsError do
   defexception [:message]
 
   def exception(opts) do
@@ -9,7 +6,7 @@ defmodule ECSx.QueryError do
     entity_id = Keyword.fetch!(opts, :entity_id)
 
     message = """
-    #{message} from entity ID #{inspect(entity_id)}
+    #{message} from entity #{entity_id}
     """
 
     %__MODULE__{message: message}

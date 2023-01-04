@@ -8,9 +8,16 @@ defmodule ECSx.Base do
 
   def get_one(component_type, entity_id) do
     case :ets.lookup(component_type, entity_id) do
-      [] -> nil
-      [{_, value}] -> value
-      multiple_results -> query_error(multiple_results, entity_id)
+      [] ->
+        nil
+
+      [{_, value}] ->
+        value
+
+      multiple_results ->
+        raise ECSx.MultipleResultsError,
+          message: "get_one expects zero or one results, got #{length(multiple_results)}",
+          entity_id: entity_id
     end
   end
 
@@ -48,12 +55,6 @@ defmodule ECSx.Base do
 
   def exists?(component_type, entity_id) do
     :ets.member(component_type, entity_id)
-  end
-
-  def query_error(results, entity_id) do
-    raise ECSx.QueryError,
-      message: "get_one expects zero or one results, got #{length(results)}",
-      entity_id: entity_id
   end
 
   def init(table_name, table_type, concurrency) do
