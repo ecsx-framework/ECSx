@@ -4,7 +4,7 @@ defmodule ECSx.Manager do
 
   In an ECSx application, the Manager is responsible for:
 
-    * starting up ETS tables for each Aspect, where the Components will be stored
+    * starting up ETS tables for each Component Type, where the Components will be stored
     * prepopulating the game content into memory
     * keeping track of the Systems to run, and their run order
     * configuring the tick rate for the application
@@ -16,11 +16,11 @@ defmodule ECSx.Manager do
   (i.e. 20 ticks per second).  Feel free to change this number to fit the needs
   of your application.
 
-  ## `aspects/0` and `systems/0`
+  ## `components/0` and `systems/0`
 
-  Your Manager module must contain two zero-arity functions called `aspects` and `systems`
-  which return a list of all Aspects or Systems in your application.  The order of
-  the Aspects list is irrelevant, but the order of the Systems list is very important,
+  Your Manager module must contain two zero-arity functions called `components` and `systems`
+  which return a list of all Component Types and Systems in your application.  The order of
+  the Component Types list is irrelevant, but the order of the Systems list is very important,
   because the Systems are run consecutively in the given order.
 
   ## `setup` block
@@ -41,7 +41,7 @@ defmodule ECSx.Manager do
       def start_link(_), do: ECSx.Manager.start_link(__MODULE__)
 
       def init(_) do
-        Enum.each(aspects(), fn module -> module.init() end)
+        Enum.each(components(), fn module -> module.init() end)
 
         max_tick = ECSx.Manager.final_tick(systems())
 
@@ -74,7 +74,7 @@ defmodule ECSx.Manager do
   Runs the given code block during startup.
 
   The code will be run during the Manager's initialization (so pay special attention to the
-  position of `ECSx.Manager` in your application's supervision tree). The Aspect tables will
+  position of `ECSx.Manager` in your application's supervision tree). The Component tables will
   be created before `setup` is executed.
 
   ## Example
@@ -85,9 +85,9 @@ defmodule ECSx.Manager do
 
     setup do
       for npc <- YourApp.fetch_npc_spawn_info() do
-        Name.add_component(npc.id, npc.name)
-        HitPoints.add_component(npc.id, npc.hp)
-        Location.add_component(npc.id, npc.spawn_location)
+        YourApp.Components.Name.add(npc.id, npc.name)
+        YourApp.Components.HitPoints.add(npc.id, npc.hp)
+        YourApp.Components.Location.add(npc.id, npc.spawn_location)
       end
     end
   end

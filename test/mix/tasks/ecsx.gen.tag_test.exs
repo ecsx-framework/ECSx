@@ -1,6 +1,6 @@
 Code.require_file("../../support/mix_helper.exs", __DIR__)
 
-defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
+defmodule Mix.Tasks.Ecsx.Gen.TagTest do
   use ExUnit.Case
 
   import ECSx.MixHelper
@@ -11,41 +11,19 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
     :ok
   end
 
-  test "generates component type module" do
+  test "generates tag module" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
-      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "binary"])
+      Mix.Tasks.Ecsx.Gen.Tag.run(["FooTag"])
 
-      component_file = File.read!("lib/my_app/components/foo_component.ex")
+      component_file = File.read!("lib/my_app/components/foo_tag.ex")
 
       assert component_file ==
                """
-               defmodule MyApp.Components.FooComponent do
+               defmodule MyApp.Components.FooTag do
                  @moduledoc \"\"\"
-                 Documentation for FooComponent components.
+                 Documentation for FooTag components.
                  \"\"\"
-                 use ECSx.Component,
-                   value: :binary,
-                   unique: true
-               end
-               """
-    end)
-  end
-
-  test "generates module for non-unique component type" do
-    Mix.Project.in_project(:my_app, ".", fn _module ->
-      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "binary", "--no-unique"])
-
-      component_file = File.read!("lib/my_app/components/foo_component.ex")
-
-      assert component_file ==
-               """
-               defmodule MyApp.Components.FooComponent do
-                 @moduledoc \"\"\"
-                 Documentation for FooComponent components.
-                 \"\"\"
-                 use ECSx.Component,
-                   value: :binary,
-                   unique: false
+                 use ECSx.Tag
                end
                """
     end)
@@ -53,7 +31,7 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
 
   test "injects component type into manager" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
-      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "integer"])
+      Mix.Tasks.Ecsx.Gen.Tag.run(["FooTag"])
 
       manager_file = File.read!("lib/my_app/manager.ex")
 
@@ -72,7 +50,7 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
                  # Declare all valid Component types
                  def components do
                    [
-                     MyApp.Components.FooComponent
+                     MyApp.Components.FooTag
                    ]
                  end
 
@@ -89,9 +67,9 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
 
   test "multiple component types injected into manager" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
-      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "binary"])
-      Mix.Tasks.Ecsx.Gen.Component.run(["BarComponent", "integer"])
-      Mix.Tasks.Ecsx.Gen.Component.run(["BazComponent", "float"])
+      Mix.Tasks.Ecsx.Gen.Tag.run(["FooTag"])
+      Mix.Tasks.Ecsx.Gen.Tag.run(["BarTag"])
+      Mix.Tasks.Ecsx.Gen.Tag.run(["BazTag"])
 
       manager_file = File.read!("lib/my_app/manager.ex")
 
@@ -110,9 +88,9 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
                  # Declare all valid Component types
                  def components do
                    [
-                     MyApp.Components.BazComponent,
-                     MyApp.Components.BarComponent,
-                     MyApp.Components.FooComponent
+                     MyApp.Components.BazTag,
+                     MyApp.Components.BarTag,
+                     MyApp.Components.FooTag
                    ]
                  end
 
@@ -129,19 +107,9 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
 
   test "fails with invalid arguments" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
-      # Missing argument
-      assert_raise(Mix.Error, fn ->
-        Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent"])
-      end)
-
       # No arguments
       assert_raise(Mix.Error, fn ->
-        Mix.Tasks.Ecsx.Gen.Component.run([])
-      end)
-
-      # Bad value type
-      assert_raise(Mix.Error, fn ->
-        Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "invalid"])
+        Mix.Tasks.Ecsx.Gen.Tag.run([])
       end)
     end)
   end

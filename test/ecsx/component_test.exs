@@ -1,28 +1,28 @@
 defmodule ECSx.ComponentTest do
   use ExUnit.Case
 
-  alias ECSx.TestComponent
+  alias ECSx.StringComponent
 
   describe "__using__" do
-    test "generates functions for an aspect" do
-      assert :ok == TestComponent.init()
+    test "generates functions for a component type" do
+      assert :ok == StringComponent.init()
 
-      assert :ok == TestComponent.add(11, "Andy")
+      assert :ok == StringComponent.add(11, "Andy")
 
-      assert "Andy" == TestComponent.get_one(11)
+      assert "Andy" == StringComponent.get_one(11)
 
       for {id, foo} <- [{1, "A"}, {2, "B"}, {3, "C"}],
-          do: TestComponent.add(id, foo)
+          do: StringComponent.add(id, foo)
 
-      assert :ok == TestComponent.remove(3)
+      assert :ok == StringComponent.remove(3)
 
-      refute TestComponent.exists?(3)
+      refute StringComponent.exists?(3)
 
-      assert TestComponent.exists?(1)
-      assert TestComponent.exists?(2)
-      assert TestComponent.exists?(11)
+      assert StringComponent.exists?(1)
+      assert StringComponent.exists?(2)
+      assert StringComponent.exists?(11)
 
-      all_components = TestComponent.get_all()
+      all_components = StringComponent.get_all()
 
       assert Enum.sort(all_components) == [
                {1, "A"},
@@ -33,23 +33,15 @@ defmodule ECSx.ComponentTest do
 
     defmodule BadReadConcurrency do
       use ECSx.Component,
+        value: :integer,
         unique: true,
         read_concurrency: :invalid
-    end
-
-    defmodule BadUniqueFlag do
-      use ECSx.Component,
-        unique: :invalid
     end
 
     test "invalid options are passed" do
       assert_raise ArgumentError, fn ->
         BadReadConcurrency.init()
       end
-
-      # assert_raise ArgumentError, fn ->
-      #   BadUniqueFlag.init()
-      # end
     end
   end
 end

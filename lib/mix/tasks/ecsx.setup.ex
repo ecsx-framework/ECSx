@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
         def start(_type, _args) do
           children = [
             ...
-            #{inspect(root_module())}.Manager,
+            #{root_module()}.Manager,
             ...
           ]
         end

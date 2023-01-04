@@ -1,6 +1,6 @@
 # ECS Design
 
-### Entities, Aspects, and Components
+## Entities and Components
 
 Everything in your application is an Entity, but in ECS you won't work with these
 Entities directly - instead you will work with the individual attributes that an Entity
@@ -14,7 +14,7 @@ at minimum, the Entity's unique ID, but also can store a value.  For example:
 * The car would also have Components such as `XCoordinate` and `YCoordinate` to locate it
   on the map
 
-### Systems
+## Systems
 
 Once your Entities are modeled using Components, you'll create Systems to operate on them.
 For example:

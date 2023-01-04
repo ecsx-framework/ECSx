@@ -24,6 +24,12 @@ defmodule ECSx.Base do
     |> Enum.map(&elem(&1, 1))
   end
 
+  def get_all_keys(component_type) do
+    component_type
+    |> :ets.tab2list()
+    |> Enum.map(&elem(&1, 0))
+  end
+
   def search(component_type, value) do
     component_type
     |> :ets.match({:"$1", value})
