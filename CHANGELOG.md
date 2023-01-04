@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 (Unreleased)
+
+ECSx.QueryError renamed to ECSx.MultipleResultsError
+
 ## v0.3.0 (2023-01-03)
 
 Components are now stored as key-value pairs  
