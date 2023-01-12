@@ -10,7 +10,8 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   """
 
   use Mix.Task
-  import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
+
+  alias Mix.Tasks.ECSx.Helpers
 
   @doc false
   def run([]) do
@@ -33,15 +34,15 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
 
   defp create_system_file(system_name) do
     filename = Macro.underscore(system_name)
-    target = "lib/#{otp_app()}/systems/#{filename}.ex"
+    target = "lib/#{Helpers.otp_app()}/systems/#{filename}.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/system.ex")
-    binding = [app_name: root_module(), system_name: system_name]
+    binding = [app_name: Helpers.root_module(), system_name: system_name]
 
     Mix.Generator.create_file(target, EEx.eval_file(source, binding))
   end
 
   defp inject_system_module_into_manager(system_name) do
-    manager_path = "lib/#{otp_app()}/manager.ex"
+    manager_path = "lib/#{Helpers.otp_app()}/manager.ex"
     {before_systems, after_systems, list} = parse_manager(manager_path)
 
     new_list =
@@ -76,7 +77,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   end
 
   defp full_system_module(system_name) do
-    Module.concat([root_module(), "Systems", system_name])
+    Module.concat([Helpers.root_module(), "Systems", system_name])
   end
 
   # Adds a newline to ensure the list is formatted with one system per line

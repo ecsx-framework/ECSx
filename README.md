@@ -33,6 +33,11 @@ def start(_type, _args) do
 end
 ```
 
+## Tutorial Project
+
+[Building a ship combat engine with ECSx in a Phoenix app](https://hexdocs.pm/ecsx/tutorial.html)  
+Note: This tutorial project is a work-in-progress  
+
 ## Usage
 
 ### Entities and Components
@@ -65,11 +70,6 @@ ECSx comes with generators to quickly create new Components or Systems:
 Every ECSx application requires a Manager module, where valid Component types and Systems are declared, as well as the setup to spawn world objects before any players join.  This module is created for you during `mix ecsx.setup` and will be automatically updated by the other generators.
 
 It is especially important to consider the order of your Systems list.  The manager will run each System one at a time, in order.
-
-## Tutorial Project
-
-Note: This tutorial project is a work-in-progress  
-[Building a ship combat engine with ECSx in a Phoenix app](https://hexdocs.pm/ecsx/tutorial.html)
 
 ## License
 

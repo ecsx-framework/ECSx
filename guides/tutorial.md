@@ -367,7 +367,7 @@ This module holds four critical pieces of data - the server's tick rate, data in
 
 ```elixir
 setup do
-  for _player_count <- 1..4 do
+  for _ships <- 1..4 do
     # First generate a unique ID to represent the new entity
     entity = Ecto.UUID.generate()
 
@@ -379,15 +379,9 @@ setup do
     HullPoints.add(entity, 50)
     SeekingTarget.add(entity)
     XPosition.add(entity, Enum.random(1..100))
-    XVelocity.add(entity, 0)
     YPosition.add(entity, Enum.random(1..100))
-    YVelocity.add(entity, 0)
   end
 end
 ```
 
 Now when the server starts, there will be four ships set up and ready to go.
-
-## Coming Soon
-
-User input, display
