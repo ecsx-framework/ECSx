@@ -48,7 +48,10 @@ defmodule MyAppWeb.GameLive do
     # We must spawn the ship before processing any other input
     ECSx.ClientEvents.add(player.id, :spawn_ship)
 
-    {:ok, assign(socket, player: player)}
+    # We want to keep up-to-date on our ship's location
+    :timer.send_interval(50, :refresh_current_location)
+
+    {:ok, assign(socket, player: player, current_location: nil)}
   end
 
   def handle_event("keydown", %{"key" => key}, socket) do
@@ -71,10 +74,19 @@ defmodule MyAppWeb.GameLive do
   defp keyup(key) when key in ~w(s S ArrowDown), do: {:stop_move, :south}
   defp keyup(key) when key in ~w(d D ArrowRight), do: {:stop_move, :east}
 
+  def handle_info(:refresh_current_location, socket) do
+    player_entity = socket.assigns.player.id
+    x = XPosition.get_one(player_entity)
+    y = YPosition.get_one(player_entity)
+
+    {:noreply, assign(socket, current_location: {x, y})}
+  end
+
   def render(assigns) do
     ~H"""
     <div id="game" phx-window-keydown="keydown" phx-window-keyup="keyup" phx-throttle={:infinity}>
-      Player ID: <%= @player.id %>
+      <p>Player ID: <%= @player.id %></p>
+      <p>Player Coords: <%= inspect(@current_location) %></p>
     </div>
     """
   end
