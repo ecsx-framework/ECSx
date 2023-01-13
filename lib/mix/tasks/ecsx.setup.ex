@@ -12,7 +12,8 @@ defmodule Mix.Tasks.Ecsx.Setup do
   """
 
   use Mix.Task
-  import Mix.Tasks.ECSx.Helpers, only: [otp_app: 0, root_module: 0]
+
+  alias Mix.Tasks.ECSx.Helpers
 
   @components_list "[\n      # MyApp.Components.SampleComponent\n    ]"
   @systems_list "[\n      # MyApp.Systems.SampleSystem\n    ]"
@@ -23,9 +24,8 @@ defmodule Mix.Tasks.Ecsx.Setup do
 
     create_manager()
 
-    if Keyword.get(opts, :folders, true) do
-      create_folders()
-    end
+    if Keyword.get(opts, :folders, true),
+      do: create_folders()
 
     Mix.shell().info("""
 
@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
         def start(_type, _args) do
           children = [
             ...
-            #{root_module()}.Manager,
+            #{Helpers.root_module()}.Manager,
             ...
           ]
         end
@@ -41,11 +41,11 @@ defmodule Mix.Tasks.Ecsx.Setup do
   end
 
   defp create_manager do
-    target = "lib/#{otp_app()}/manager.ex"
+    target = "lib/#{Helpers.otp_app()}/manager.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/manager.ex")
 
     binding = [
-      app_name: root_module(),
+      app_name: Helpers.root_module(),
       components_list: @components_list,
       systems_list: @systems_list
     ]
@@ -54,7 +54,8 @@ defmodule Mix.Tasks.Ecsx.Setup do
   end
 
   defp create_folders do
-    Mix.Generator.create_directory("lib/#{otp_app()}/components")
-    Mix.Generator.create_directory("lib/#{otp_app()}/systems")
+    otp_app = Helpers.otp_app()
+    Mix.Generator.create_directory("lib/#{otp_app}/components")
+    Mix.Generator.create_directory("lib/#{otp_app}/systems")
   end
 end
