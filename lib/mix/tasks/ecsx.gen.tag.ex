@@ -21,8 +21,8 @@ defmodule Mix.Tasks.Ecsx.Gen.Tag do
   end
 
   def run([tag_name | _]) do
-    create_component_file(tag_name)
     Helpers.inject_component_module_into_manager(tag_name)
+    create_component_file(tag_name)
   end
 
   defp message_with_help(message) do
