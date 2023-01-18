@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Raise an error if a generator is run before ecsx.setup
+
 ## v0.3.1 (2023-01-12)
 
 Added ECSx.ClientEvents: ephemeral components created by client processes to communicate user input/interaction with the ECSx backend  
