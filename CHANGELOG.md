@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-Raise an error if a generator is run before ecsx.setup
+Adding ECSx.ClientEvents to the supervision tree is no longer required  
+Running a generator before ecsx.setup will now raise an error  
 
 ## v0.3.1 (2023-01-12)
 

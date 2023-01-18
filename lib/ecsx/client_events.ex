@@ -2,16 +2,6 @@ defmodule ECSx.ClientEvents do
   @moduledoc """
   A store to which clients can write, for communication with the ECSx backend.
 
-  ## Usage
-
-  To use ClientEvents, it must be added to your application's supervision tree:
-
-      children = [
-        ...
-        ECSx.ClientEvents
-        ...
-      ]
-
   Events are created from the client process by calling `add/2`, then retrieved by the handler
   system using `get_and_clear/0`.  You will be required to create the handler system yourself -
   see the [tutorial project](web_frontend_liveview.html#handling-client-events) for a detailed example.

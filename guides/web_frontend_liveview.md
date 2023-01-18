@@ -14,28 +14,19 @@ Phoenix comes with an [AuthN generator](https://hexdocs.pm/phoenix/Mix.Tasks.Phx
 
 This will expect players to register an email and password, which will be used to log in.  A unique ID will also be created for each player upon registration, allowing us to begin thinking of players as entities.  However, we can't just take the player input and start creating components with it - only systems can create components.  Instead, we'll use a special component type provided for this purpose: `ECSx.ClientEvents`.
 
-## Adding ECSx.ClientEvents
-
-First head into `application.ex` and add it to your supervision tree:
-
-```elixir
-def start(_type, _args) do
-  children = [
-    ...
-    # You can add this anywhere in the list, as long as it's before `MyAppWeb.Endpoint`.
-    ECSx.ClientEvents,
-    ...
-    MyAppWeb.Endpoint
-  ]
-
-  opts = [strategy: :one_for_one, name: MyApp.Supervisor]
-  Supervisor.start_link(children, opts)
-end
-```
-
 ## Client Input via LiveView
 
-Then we'll create `/lib/my_app_web/game_live.ex` and put it to use:
+First consider the goals for our frontend:
+
+  * Authenticate the player and hold player ID
+  * Spawn the player's ship upon connection (writes components)
+  * Hold the coordinates for the player's ship
+  * Hold the coordinates for enemy ships
+  * Validate user input to move the ship (writes components)
+
+When we need to write components, `ECSx.ClientEvents` will be our line of communication from the frontend to the backend.  
+
+Let's create `/lib/my_app_web/game_live.ex` and put it to use:
 
 ```elixir
 defmodule MyAppWeb.GameLive do
