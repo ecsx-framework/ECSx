@@ -35,11 +35,11 @@ defmodule ECSx.ClientEvents do
 
   ## Examples
 
-    # Simple event requiring no metadata
-    ECSx.ClientEvents.add(player_id, :spawn_player)
+      # Simple event requiring no metadata
+      ECSx.ClientEvents.add(player_id, :spawn_player)
 
-    # Event with metadata
-    ECSx.ClientEvents.add(player_id, {:send_message_to, recipient_id, message})
+      # Event with metadata
+      ECSx.ClientEvents.add(player_id, {:send_message_to, recipient_id, message})
 
   """
   @spec add(id(), any()) :: :ok
