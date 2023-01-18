@@ -12,4 +12,14 @@ defmodule ECSx do
   A single GenServer manages the ETS tables to ensure strict serializability and customize
   the run order for Systems.
   """
+  use Application
+
+  @doc false
+  def start(_type, _args) do
+    children = [
+      ECSx.ClientEvents
+    ]
+
+    Supervisor.start_link(children, strategy: :one_for_one, name: ECSx.Supervisor)
+  end
 end

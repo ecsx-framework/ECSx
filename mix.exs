@@ -33,6 +33,7 @@ defmodule ECSx.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {ECSx, []},
       extra_applications: [:logger, :eex, :mix]
     ]
   end
