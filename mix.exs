@@ -77,7 +77,8 @@ defmodule ECSx.MixProject do
       "guides/installation.md",
       "guides/ecs_design.md",
       "guides/tutorial.md",
-      "guides/web_frontend_liveview.md"
+      "guides/web_frontend_liveview.md",
+      "guides/common_caveats.md"
     ]
   end
 end
