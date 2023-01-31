@@ -41,7 +41,7 @@ defmodule ECSx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.29", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.14", only: :test}
     ]
@@ -69,16 +69,24 @@ defmodule ECSx.MixProject do
       logo: nil,
       extra_section: "GUIDES",
       source_url: @gh_url,
-      extras: extras()
+      extras: extras(),
+      groups_for_extras: groups_for_extras()
     ]
   end
 
   defp extras do
     [
-      "guides/installation.md",
       "guides/ecs_design.md",
-      "guides/tutorial.md",
-      "guides/web_frontend_liveview.md"
+      "guides/installation.md",
+      "guides/tutorial/introduction.md",
+      "guides/tutorial/backend_basics.md",
+      "guides/tutorial/web_frontend_liveview.md"
+    ]
+  end
+
+  defp groups_for_extras do
+    [
+      "Tutorial Project": ~r/guides\/tutorial\/.?/
     ]
   end
 end

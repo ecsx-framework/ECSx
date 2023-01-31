@@ -1,8 +1,4 @@
-# Tutorial Project
-
-Now that we have an Elixir project with Phoenix, we can get started on building a game with Entity-Component-System architecture. In our game, each player will control a ship, which can sail around the map, and will attack enemies if they come too close.
-
-> Note:  This guide will get you up-and-running with a working game, but it is intentionally generic.  Feel free to experiment with altering details from this implementation to customize your own game.
+# Backend Basics
 
 ## Defining Component Types
 
@@ -18,7 +14,7 @@ First let's consider the basic properties of a ship:
   * X Velocity:  The speed at which the ship is moving, horizontally
   * Y Velocity:  The speed at which the ship is moving, vertically
 
-Let's start by creating `integer` component types for each one of these, except AttackSpeed, which will use `float`:
+We'll start by creating `integer` component types for each one of these, except AttackSpeed, which will use `float`:
 
     $ mix ecsx.gen.component HullPoints integer
     $ mix ecsx.gen.component ArmorRating integer
@@ -367,7 +363,7 @@ This module holds four critical pieces of data - the server's tick rate, data in
 
 ```elixir
 setup do
-  for _ships <- 1..4 do
+  for _ships <- 1..40 do
     # First generate a unique ID to represent the new entity
     entity = Ecto.UUID.generate()
 
@@ -384,4 +380,4 @@ setup do
 end
 ```
 
-Now when the server starts, there will be four ships set up and ready to go.
+Now when the server starts, there will be forty ships set up and ready to go.

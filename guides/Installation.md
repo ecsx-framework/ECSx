@@ -71,6 +71,4 @@ def start(_type, _args) do
 end
 ```
 
-## Summary
-
-You should now have everything you need to start building!  If you're already familiar with the Entity-Component-System pattern, jump right in to the [tutorial project](tutorial.md) - otherwise, start with our guide on [ECS design](ecs_design.md).
+You should now have everything you need to start building!
