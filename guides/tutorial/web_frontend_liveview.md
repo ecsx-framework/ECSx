@@ -477,7 +477,7 @@ defmodule MyApp.Systems.ClientEventHandler do
 end
 ```
 
-Lastly, we'll need the [player_ship.svg]([https://github.com/APB9785/ship/blob/master/priv/static/images/player_ship.svg) and [npc_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/npc_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `Routes.static_path/2` calls in the LiveView template.
+Lastly, we'll need the [player_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/player_ship.svg) and [npc_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/npc_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `Routes.static_path/2` calls in the LiveView template.
 
 Now running
 
