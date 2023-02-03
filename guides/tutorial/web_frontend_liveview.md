@@ -306,15 +306,15 @@ defmodule MyAppWeb.GameLive do
             y={@y_coord}
             width="1"
             height="1"
-            href={Routes.static_path(@socket, "/images/player_ship.svg")}
+            href={Routes.static_path(@socket, "/images/" <> @player_ship_image_file)}
           />
-          <%= for {_entity, x, y} <- @other_ships do %>
+          <%= for {_entity, x, y, image_file} <- @other_ships do %>
             <image
               x={x}
               y={y}
               width="1"
               height="1"
-              href={Routes.static_path(@socket, "/images/other_ship.svg")}
+              href={Routes.static_path(@socket, "/images/" <> image_file)}
             />
           <% end %>
           <text x={@x_offset} y={@y_offset + 1} style="font: 1px serif">
@@ -338,9 +338,9 @@ The loading screen will still use the same viewBox and background, but with only
 
 Once the game is finished loading, we'll display three things:  the player's ship, other ships, and the player's current HP.
 
-For the player's ship, we'll make an `image` element, using the existing x and y coordinates, defining the size as one game tile, and pointing to the `player_ship.svg` source file.
+For the player's ship, we'll make an `image` element, using the existing x and y coordinates, defining the size as one game tile, and pointing to the player's ship image file.
 
-For other ships, we'll need a new assign to hold that data - ID and coordinates, at minimum.  Then each one will get an `image` just like the player's ship, but with a different source file to set them apart visually.
+For other ships, we'll need a new assign to hold that data - ID and coordinates, at minimum.  Then each one will get an `image` just like the player's ship.
 
 Lastly, we'll put an HP display near the top-left corner.
 
@@ -371,6 +371,7 @@ defmodule MyAppWeb.GameLive do
       x_coord: nil,
       y_coord: nil,
       current_hp: nil,
+      player_ship_image_file: nil,
       other_ships: [],
       x_offset: 0,
       y_offset: 0,
@@ -403,18 +404,29 @@ defmodule MyAppWeb.GameLive do
     {:noreply, socket}
   end
   ...
+  defp assign_player_ship(socket) do
+    x = XPosition.get_one(socket.assigns.player_entity)
+    y = YPosition.get_one(socket.assigns.player_entity)
+    hp = HullPoints.get_one(socket.assigns.player_entity)
+    image = ImageFile.get_one(socket.assigns.player_entity)
+
+    assign(socket, x_coord: x, y_coord: y, current_hp: hp, player_ship_image_file: image)
+  end
+
   defp assign_other_ships(socket) do
     other_ships =
-      Enum.reject(all_ships(), fn {entity, _x, _y} -> entity == socket.assigns.player_entity end)
+      Enum.reject(all_ships(), fn {entity, _, _, _} -> entity == socket.assigns.player_entity end)
 
     assign(socket, other_ships: other_ships)
   end
 
   defp all_ships do
-    xs = XPosition.get_all() |> Enum.sort()
-    ys = YPosition.get_all() |> Enum.sort()
-
-    Enum.zip_with(xs, ys, fn {entity, x}, {entity, y} -> {entity, x, y} end)
+    for {ship, _hp} <- HullPoints.get_all() do
+      x = XPosition.get_one(ship)
+      y = YPosition.get_one(ship)
+      image = ImageFile.get_one(ship)
+      {ship, x, y, image}
+    end
   end
 
   defp assign_offsets(socket) do
@@ -438,7 +450,34 @@ defmodule MyAppWeb.GameLive do
 end
 ```
 
-Lastly, we'll need the [player_ship.svg]([https://github.com/APB9785/ship/blob/master/priv/static/images/player_ship.svg) and [other_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/other_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `Routes.static_path/2` calls in the LiveView template.
+Next let's create the `ImageFile` components when a ship is spawned:
+
+```elixir
+defmodule MyApp.Manager do
+  ...
+  setup do
+    for _ships <- 1..40 do
+      ...
+      MyApp.Components.ImageFile.add(entity, "npc_ship.svg")
+    end
+  end
+  ...
+end
+```
+
+```elixir
+defmodule MyApp.Systems.ClientEventHandler do
+  ...
+  defp process_one({player, :spawn_ship}) do
+    ...
+    ImageFile.add(player, "player_ship.svg")
+    PlayerSpawned.add(player)
+  end
+  ...
+end
+```
+
+Lastly, we'll need the [player_ship.svg]([https://github.com/APB9785/ship/blob/master/priv/static/images/player_ship.svg) and [npc_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/npc_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `Routes.static_path/2` calls in the LiveView template.
 
 Now running
 
@@ -446,6 +485,254 @@ Now running
 
 and heading to `localhost:4000/game` should provide a usable game interface to move your ship around, ideally keeping it out of attack range of enemy ships, while remaining close enough for your own ship to attack (remember that we gave the player ship a longer attack range than the enemy ships).
 
-## Coming Soon
+## Projectile Animations
 
-Currently the most challenging part of the game is knowing when your ship is attacking, and when it is being attacked.  An upcoming guide will show an example of rendering projectile animations!
+Currently the most challenging part of the game is knowing when your ship is attacking, and when it is being attacked.  Let's implement a new feature to make attacks visible to the player(s).  There are several ways to go about this;  we're going to take an approach that showcases ECS design:
+
+  * Instead of an attack immediately dealing damage, it will spawn a cannonball entity
+  * The cannonball entity will have position and velocity components, like ships do
+  * It will also have new components such as `ProjectileTarget` and `ProjectileDamage`
+  * A `Projectile` system will guide it to its target, then destroy the cannonball and deal damage
+  * In our LiveView, we'll create a new assign to hold the locations of projectiles
+  * The new assign will be used to create SVG elements
+  * To help fetch locations for projectiles only, we'll add an `IsProjectile` tag
+
+Start by running the generator commands for our new components, systems, and tag:
+
+    $ mix ecsx.gen.component ProjectileTarget binary
+    $ mix ecsx.gen.component ProjectileDamage integer
+    $ mix ecsx.gen.system Projectile
+    $ mix ecsx.gen.tag IsProjectile
+
+Then we need to update the `Attacking` system to spawn projectiles instead of immediately dealing damage.  We'll replace the existing `deal_damage/2` with a `spawn_projectile/2`:
+
+```elixir
+defmodule MyApp.Systems.Attacking do
+  ...
+  defp attack_if_ready({self, target}) do
+    cond do
+      ...
+      :otherwise ->
+        spawn_projectile(self, target)
+        add_cooldown(self)
+    end
+  end
+
+  defp spawn_projectile(self, target) do
+    attack_damage = AttackDamage.get_one(self)
+    x = XPosition.get_one(self)
+    y = YPosition.get_one(self)
+    # Armor reduction should wait until impact to be calculated
+    cannonball_entity = Ecto.UUID.generate()
+
+    IsProjectile.add(cannonball_entity)
+    XPosition.add(cannonball_entity, x)
+    YPosition.add(cannonball_entity, y)
+    ImageFile.add(cannonball_entity, "cannonball.svg")
+    ProjectileTarget.add(cannonball_entity, target)
+    ProjectileDamage.add(cannonball_entity, attack_damage)
+  end
+  ...
+end
+```
+
+Notice we didn't worry about setting the velocity, because that will be handled by the `Projectile` system:
+
+```elixir
+defmodule MyApp.Systems.Projectile do
+  ...
+  @cannonball_speed 3
+
+  def run do
+    projectiles = IsProjectile.get_all()
+      
+    Enum.each(projectiles, fn projectile ->
+      case ProjectileTarget.get_one(projectile) do
+        nil ->
+          # The target has already been destroyed
+          destroy_projectile(projectile)
+
+        target ->
+          continue_seeking_target(projectile, target)
+      end
+    end)
+  end
+
+  defp continue_seeking_target(projectile, target) do
+    {dx, dy, distance} = get_distance_to_target(projectile, target)
+
+    case distance do
+      0 ->
+        collision(projectile, target)
+
+      distance when distance / @cannonball_speed <= 1 ->
+        move_directly_to_target(projectile, {dx, dy})
+
+      distance ->
+        adjust_velocity_towards_target(projectile, {distance, dx, dy})
+    end
+  end
+
+  defp get_distance_to_target(projectile, target) do
+    target_x = XPosition.get_one(target)
+    target_y = YPosition.get_one(target)
+    target_dx = XVelocity.get_one(target) || 0
+    target_dy = YVelocity.get_one(target) || 0
+    target_next_x = target_x + target_dx
+    target_next_y = target_y + target_dy
+
+    x = XPosition.get_one(projectile)
+    y = YPosition.get_one(projectile)
+
+    dx = target_next_x - x
+    dy = target_next_y - y
+
+    # Now we know what is needed, but we need to slow it down, so its travel
+    # will take more than one tick.  Otherwise the player will not see it!
+
+    {dx, dy, ceil(:math.sqrt(dx ** 2 + dy ** 2))}
+  end
+
+  defp collision(projectile, target) do
+    damage_target(projectile, target)
+    destroy_projectile(projectile)
+  end
+
+  defp damage_target(projectile, target) do
+    damage = ProjectileDamage.get_one(projectile)
+    reduction_from_armor = ArmorRating.get_one(target)
+    final_damage_amount = amount - reduction_from_armor
+
+    target_current_hp = HullPoints.get_one(target)
+    target_new_hp = target_current_hp - final_damage_amount
+
+    HullPoints.add(target, target_new_hp)
+  end
+
+  defp destroy_projectile(projectile) do
+    IsProjectile.remove(projectile)
+    XPosition.remove(projectile)
+    YPosition.remove(projectile)
+    XVelocity.remove(projectile)
+    YVelocity.remove(projectile)
+    ImageFile.remove(projectile)
+    ProjectileTarget.remove(projectile)
+    ProjectileDamage.remove(projectile)
+  end
+
+  defp move_directly_to_target(projectile, {dx, dy}) do
+    XVelocity.add(projectile, dx)
+    YVelocity.add(projectile, dy)
+  end
+
+  defp adjust_velocity_towards_target(projectile, {distance, dx, dy}) do
+    ticks_away = ceil(distance / @cannonball_speed)
+    adjusted_dx = div(dx, ticks_away)
+    adjusted_dy = div(dy, ticks_away)
+
+    XVelocity.add(projectile, adjusted_dx)
+    YVelocity.add(projectile, adjusted_dy)
+  end
+end
+```
+
+Note that we rely on the absence of a `ProjectileTarget` to know that the target is already destroyed.  Currently our `Destruction` system does have an `untarget` feature for removing target components upon destruction, but this only applies to `AttackTarget`s.  We'll want to expand this feature to also cover `ProjectileTarget`s:
+
+```elixir
+defmodule MyApp.Systems.Destruction do
+  ...
+  defp untarget(target) do
+    for ship <- AttackTarget.search(target) do
+      AttackTarget.remove(ship)
+      SeekingTarget.add(ship)
+    end
+
+    for projectile <- ProjectileTarget.search(target) do
+      ProjectileTarget.remove(projectile)
+    end
+  end
+end
+```
+
+Our final task is to render these projectiles in the LiveView.  Let's start by adding a new assign:
+
+```elixir
+defmodule MyApp.GameLive do
+  ...
+  defp assign_loading_state(socket) do
+    assign(socket,
+      ...
+      projectiles: []
+    )
+  end
+
+  def handle_info(:first_load, socket) do
+    ...
+    socket =
+      socket
+      |> assign_player_ship()
+      |> assign_other_ships()
+      |> assign_projectiles()
+      |> assign_offsets()
+      |> assign(loading: false)
+    ...
+  end
+
+  def handle_info(:refresh, socket) do
+    socket =
+      socket
+      |> assign_player_ship()
+      |> assign_other_ships()
+      |> assign_projectiles()
+      |> assign_offsets()
+    ...
+  end
+  ...
+  defp assign_projectiles(socket) do
+    projectiles =
+      for projectile <- IsProjectile.get_all() do
+        x = XPosition.get_one(projectile)
+        y = YPosition.get_one(projectile)
+        image = ImageFile.get_one(projectile)
+        {projectile, x, y, image}
+      end
+
+    assign(socket, projectiles: projectiles)
+  end
+  ...
+end
+```
+
+Then we'll update the render to include the projectiles:
+
+```elixir
+defmodule MyApp.GameLive do
+  def render(assigns) do
+    ~H"""
+    ...
+    <%= for {_entity, x, y, image_file} <- @projectiles do %>
+      <image
+        x={x}
+        y={y}
+        width="1"
+        height="1"
+        href={Routes.static_path(@socket, "/images/" <> image_file)}
+      />
+    <% end %>
+    ...
+    """
+  end
+end
+```
+
+Lastly - `cannonball.svg` - we will make this file from scratch!
+
+    $ touch priv/static/images/cannonball.svg
+
+```html
+<svg width="100" height="100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="25" stroke="black" fill="gray" stroke-width="5" />
+</svg>
+```
+
+The `width` and `height` values will be overriden by our LiveView render's `width="1" height="1"`, but they still play an important role - because the circle's parameters will be measured relative to these - so we'll set them to `100` for simplicity.  `cx` and `cy` represent the coordinates for the center of the circle, which should be one-half the `width` and `height`.  The size of the circle will be set with `r` (radius) and `stroke-width` (the border around the circle) - we can calculate `diameter = 2 * (r + stroke_width) = 60`.  This diameter is also relative, so when our `cannonball.svg` is scaled down to `1 x 1`, the visible circle will be `0.6 x 0.6`
