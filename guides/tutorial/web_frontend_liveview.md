@@ -587,9 +587,6 @@ defmodule MyApp.Systems.Projectile do
     dx = target_next_x - x
     dy = target_next_y - y
 
-    # Now we know what is needed, but we need to slow it down, so its travel
-    # will take more than one tick.  Otherwise the player will not see it!
-
     {dx, dy, ceil(:math.sqrt(dx ** 2 + dy ** 2))}
   end
 
@@ -626,6 +623,8 @@ defmodule MyApp.Systems.Projectile do
   end
 
   defp adjust_velocity_towards_target(projectile, {distance, dx, dy}) do
+    # We know what is needed, but we need to slow it down, so its travel
+    # will take more than one tick.  Otherwise the player will not see it!
     ticks_away = ceil(distance / @cannonball_speed)
     adjusted_dx = div(dx, ticks_away)
     adjusted_dy = div(dy, ticks_away)
