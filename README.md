@@ -35,7 +35,7 @@ end
 
 ## Tutorial Project
 
-[Building a ship combat engine with ECSx in a Phoenix app](https://hexdocs.pm/ecsx/introduction.html)  
+[Building a ship combat engine with ECSx in a Phoenix app](https://hexdocs.pm/ecsx/initial_setup.html)  
 Note: This tutorial project is a work-in-progress  
 
 ## Usage
