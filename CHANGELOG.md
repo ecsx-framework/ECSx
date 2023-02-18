@@ -3,7 +3,8 @@
 ## Unreleased
 
 Adding ECSx.ClientEvents to the supervision tree is no longer required  
-Running a generator before ecsx.setup will now raise an error  
+Running a generator before ecsx.setup will now raise an error   
+Added telemetry events  
 
 ## v0.3.1 (2023-01-12)
 
