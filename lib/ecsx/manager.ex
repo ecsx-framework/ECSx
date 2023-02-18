@@ -58,7 +58,12 @@ defmodule ECSx.Manager do
       def handle_info(:tick, {current, max}) do
         Enum.each(systems(), fn system ->
           if rem(current, system.__period__()) == 0 do
+            start_time = System.monotonic_time()
             system.run()
+            duration = System.monotonic_time() - start_time
+            measurements = %{duration: duration}
+            metadata = %{system: system}
+            :telemetry.execute([:ecsx, :system_run], measurements, metadata)
           end
         end)
 

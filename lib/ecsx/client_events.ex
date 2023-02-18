@@ -23,8 +23,16 @@ defmodule ECSx.ClientEvents do
 
   @doc false
   def handle_call(:get_and_clear, _from, state) do
-    {:reply, Enum.reverse(state), []}
+    {reversed, count} = reverse_and_count(state)
+
+    :telemetry.execute([:ecsx, :client_events], %{count: count})
+
+    {:reply, reversed, []}
   end
+
+  defp reverse_and_count(list, done \\ [], count \\ 0)
+  defp reverse_and_count([], done, count), do: {done, count}
+  defp reverse_and_count([h | t], done, count), do: reverse_and_count(t, [h | done], count + 1)
 
   @doc """
   Add a new client event.
