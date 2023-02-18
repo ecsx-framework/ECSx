@@ -43,7 +43,8 @@ defmodule ECSx.MixProject do
     [
       {:ex_doc, "~> 0.29", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.14", only: :test}
+      {:excoveralls, "~> 0.14", only: :test},
+      {:telemetry, "~> 1.0"}
     ]
   end
 
@@ -78,7 +79,7 @@ defmodule ECSx.MixProject do
     [
       "guides/ecs_design.md",
       "guides/installation.md",
-      "guides/tutorial/introduction.md",
+      "guides/tutorial/initial_setup.md",
       "guides/tutorial/backend_basics.md",
       "guides/tutorial/web_frontend_liveview.md"
     ]
