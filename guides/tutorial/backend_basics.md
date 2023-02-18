@@ -43,17 +43,17 @@ Let's start with changing position based on velocity.  We'll call it `Driver`:
 
     $ mix ecsx.gen.system Driver
 
-Head over to the generated file `lib/my_app/systems/driver.ex` and we'll add some code:
+Head over to the generated file `lib/ship/systems/driver.ex` and we'll add some code:
 
 ```elixir
-defmodule MyApp.Systems.Driver do
+defmodule Ship.Systems.Driver do
   ...
   use ECSx.System
 
-  alias MyApp.Components.XPosition
-  alias MyApp.Components.YPosition
-  alias MyApp.Components.XVelocity
-  alias MyApp.Components.YVelocity
+  alias Ship.Components.XPosition
+  alias Ship.Components.YPosition
+  alias Ship.Components.XVelocity
+  alias Ship.Components.YVelocity
 
   def run do
     for {entity, x_velocity} <- XVelocity.get_all() do
@@ -79,7 +79,7 @@ end
 
 Now whenever a ship gains velocity, this system will update the position accordingly over time.  Keep in mind that the velocity is relative to the server's tick rate, which by default is 20.  This means the unit of measurement is "game units per 1/20th of a second".
 
-For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `lib/my_app/manager.ex`.
+For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `lib/ship/manager.ex`.
 
 ## Targeting & Attacking
 
@@ -111,13 +111,13 @@ Once a target is found, the `AttackTarget` component will be needed, and this ti
 Before we set up the systems, let's make a helper module for storing any shared mathematical logic.  In particular, we'll need a function for calculating the distance between two entities.  This will come in handy for several systems in the future.
 
 ```elixir
-defmodule MyApp.SystemUtils do
+defmodule Ship.SystemUtils do
   @moduledoc """
   Useful math functions used by multiple systems.
   """
 
-  alias MyApp.Components.XPosition
-  alias MyApp.Components.YPosition
+  alias Ship.Components.XPosition
+  alias Ship.Components.YPosition
 
   def distance_between(entity_1, entity_2) do
     x_1 = XPosition.get_one(entity_1)
@@ -138,15 +138,15 @@ Now we're onto the Targeting system, which operates only on entities with the Se
     $ mix ecsx.gen.system Targeting
 
 ```elixir
-defmodule MyApp.Systems.Targeting do
+defmodule Ship.Systems.Targeting do
   ...
   use ECSx.System
 
-  alias MyApp.Components.AttackRange
-  alias MyApp.Components.AttackTarget
-  alias MyApp.Components.HullPoints
-  alias MyApp.Components.SeekingTarget
-  alias MyApp.SystemUtils
+  alias Ship.Components.AttackRange
+  alias Ship.Components.AttackTarget
+  alias Ship.Components.HullPoints
+  alias Ship.Components.SeekingTarget
+  alias Ship.SystemUtils
 
   def run do
     entities = SeekingTarget.get_all()
@@ -186,19 +186,19 @@ The Attacking system will also check distance, but only to the target ship, in c
     $ mix ecsx.gen.system Attacking
 
 ```elixir
-defmodule MyApp.Systems.Attacking do
+defmodule Ship.Systems.Attacking do
   ...
   use ECSx.System
 
-  alias MyApp.Components.ArmorRating
-  alias MyApp.Components.AttackCooldown
-  alias MyApp.Components.AttackDamage
-  alias MyApp.Components.AttackRange
-  alias MyApp.Components.AttackSpeed
-  alias MyApp.Components.AttackTarget
-  alias MyApp.Components.HullPoints
-  alias MyApp.Components.SeekingTarget
-  alias MyApp.SystemUtils
+  alias Ship.Components.ArmorRating
+  alias Ship.Components.AttackCooldown
+  alias Ship.Components.AttackDamage
+  alias Ship.Components.AttackRange
+  alias Ship.Components.AttackSpeed
+  alias Ship.Components.AttackTarget
+  alias Ship.Components.HullPoints
+  alias Ship.Components.SeekingTarget
+  alias Ship.SystemUtils
   
   def run do
     attack_targets = AttackTarget.get_all()
@@ -263,11 +263,13 @@ Our attacking system will add a cooldown with an expiration timestamp, but the n
 
     $ mix ecsx.gen.system CooldownExpiration
 
-> Note: going forwards, aliases will be omitted from the examples to save space.  Don't forget to include the required aliases for your component types!
-
 ```elixir
-defmodule MyApp.Systems.CooldownExpiration do
+defmodule Ship.Systems.CooldownExpiration do
   ...
+  use ECSx.System
+
+  alias Ship.Components.AttackCooldown
+
   def run do
     now = DateTime.utc_now()
     cooldowns = AttackCooldown.get_all()
@@ -295,8 +297,24 @@ Next let's handle what happens when a ship has its HP reduced to zero or less:
     $ mix ecsx.gen.system Destruction
 
 ```elixir
-defmodule MyApp.Systems.Destruction do
+defmodule Ship.Systems.Destruction do
   ...
+  use ECSx.System
+
+  alias Ship.Components.ArmorRating
+  alias Ship.Components.AttackCooldown
+  alias Ship.Components.AttackDamage
+  alias Ship.Components.AttackRange
+  alias Ship.Components.AttackSpeed
+  alias Ship.Components.AttackTarget
+  alias Ship.Components.DestroyedAt
+  alias Ship.Components.HullPoints
+  alias Ship.Components.SeekingTarget
+  alias Ship.Components.XPosition
+  alias Ship.Components.XVelocity
+  alias Ship.Components.YPosition
+  alias Ship.Components.YVelocity
+
   def run do
     ships = HullPoints.get_all()
 
@@ -338,10 +356,10 @@ In this example we remove all the components the entity might have, then add a n
 
 ## Initializing Components
 
-By now you might be wondering "How did those components get created in the first place?"  We have code for adding `AttackCooldown` and `DestroyedAt`, when needed, but the basic components for the ships still need to be added before the game can even start.  For that, we'll check out `lib/my_app/manager.ex`:
+By now you might be wondering "How did those components get created in the first place?"  We have code for adding `AttackCooldown` and `DestroyedAt`, when needed, but the basic components for the ships still need to be added before the game can even start.  For that, we'll check out `lib/ship/manager.ex`:
 
 ```elixir
-defmodule MyApp.Manager do
+defmodule Ship.Manager do
   ...
   use ECSx.Manager, tick_rate: 20
 
@@ -368,14 +386,14 @@ setup do
     entity = Ecto.UUID.generate()
 
     # Then use that ID to create the components which make up a ship    
-    ArmorRating.add(entity, 0)
-    AttackDamage.add(entity, 5)
-    AttackRange.add(entity, 10)
-    AttackSpeed.add(entity, 1.05)
-    HullPoints.add(entity, 50)
-    SeekingTarget.add(entity)
-    XPosition.add(entity, Enum.random(1..100))
-    YPosition.add(entity, Enum.random(1..100))
+    Ship.Components.ArmorRating.add(entity, 0)
+    Ship.Components.AttackDamage.add(entity, 5)
+    Ship.Components.AttackRange.add(entity, 10)
+    Ship.Components.AttackSpeed.add(entity, 1.05)
+    Ship.Components.HullPoints.add(entity, 50)
+    Ship.Components.SeekingTarget.add(entity)
+    Ship.Components.XPosition.add(entity, Enum.random(1..100))
+    Ship.Components.YPosition.add(entity, Enum.random(1..100))
   end
 end
 ```
