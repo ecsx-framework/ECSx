@@ -5,6 +5,8 @@
 Adding ECSx.ClientEvents to the supervision tree is no longer required  
 Running a generator before ecsx.setup will now raise an error   
 Added telemetry events  
+Tick rate is now set in application config  
+Added ECSx.tick_rate/0 for reading the configured value  
 
 ## v0.3.1 (2023-01-12)
 
