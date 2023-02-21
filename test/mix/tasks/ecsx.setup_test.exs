@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Ecsx.SetupTest do
                  @moduledoc \"\"\"
                  ECSx manager.
                  \"\"\"
-                 use ECSx.Manager, tick_rate: 20
+                 use ECSx.Manager
 
                  setup do
                    # Load your initial components

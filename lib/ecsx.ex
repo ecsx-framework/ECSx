@@ -26,10 +26,10 @@ defmodule ECSx do
   @doc """
   Returns the tick rate of the ECSx application.
 
-  This defaults to 20, and can be configured with
+  This defaults to 20, and can be changed in your app configuration:
 
   ```elixir
-  config :ecsx, tick_rate: 20
+  config :ecsx, tick_rate: 15
   ```
   """
   @spec tick_rate() :: integer()
