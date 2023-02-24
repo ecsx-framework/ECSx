@@ -7,14 +7,7 @@ defmodule ECSx.Manager do
     * starting up ETS tables for each Component Type, where the Components will be stored
     * prepopulating the game content into memory
     * keeping track of the Systems to run, and their run order
-    * configuring the tick rate for the application
     * running the Systems every tick
-
-  ## `:tick_rate` option
-
-  The `mix ecsx.setup` generator creates a Manager file with `:tick_rate` set to 20
-  (i.e. 20 ticks per second).  Feel free to change this number to fit the needs
-  of your application.
 
   ## `components/0` and `systems/0`
 
@@ -36,8 +29,6 @@ defmodule ECSx.Manager do
 
       import ECSx.Manager
 
-      @tick_rate opts[:tick_rate] || 20
-
       def start_link(_), do: ECSx.Manager.start_link(__MODULE__)
 
       def init(_) do
@@ -49,7 +40,8 @@ defmodule ECSx.Manager do
       end
 
       def handle_continue(:start_systems, max_tick) do
-        tick_interval = div(1000, @tick_rate)
+        tick_rate = ECSx.tick_rate()
+        tick_interval = div(1000, tick_rate)
         :timer.send_interval(tick_interval, :tick)
 
         {:noreply, {0, max_tick}}

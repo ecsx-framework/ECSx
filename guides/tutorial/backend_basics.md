@@ -79,7 +79,7 @@ end
 
 Now whenever a ship gains velocity, this system will update the position accordingly over time.  Keep in mind that the velocity is relative to the server's tick rate, which by default is 20.  This means the unit of measurement is "game units per 1/20th of a second".
 
-For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `lib/ship/manager.ex`.
+For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `config/config.ex`.
 
 ## Targeting & Attacking
 
