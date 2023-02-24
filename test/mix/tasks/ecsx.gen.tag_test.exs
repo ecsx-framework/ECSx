@@ -41,7 +41,7 @@ defmodule Mix.Tasks.Ecsx.Gen.TagTest do
                  @moduledoc \"\"\"
                  ECSx manager.
                  \"\"\"
-                 use ECSx.Manager, tick_rate: 20
+                 use ECSx.Manager
 
                  setup do
                    # Load your initial components
@@ -79,7 +79,7 @@ defmodule Mix.Tasks.Ecsx.Gen.TagTest do
                  @moduledoc \"\"\"
                  ECSx manager.
                  \"\"\"
-                 use ECSx.Manager, tick_rate: 20
+                 use ECSx.Manager
 
                  setup do
                    # Load your initial components

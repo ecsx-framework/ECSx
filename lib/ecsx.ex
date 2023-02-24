@@ -22,4 +22,18 @@ defmodule ECSx do
 
     Supervisor.start_link(children, strategy: :one_for_one, name: ECSx.Supervisor)
   end
+
+  @doc """
+  Returns the tick rate of the ECSx application.
+
+  This defaults to 20, and can be changed in your app configuration:
+
+  ```elixir
+  config :ecsx, tick_rate: 15
+  ```
+  """
+  @spec tick_rate() :: integer()
+  def tick_rate do
+    Application.get_env(:ecsx, :tick_rate, 20)
+  end
 end
