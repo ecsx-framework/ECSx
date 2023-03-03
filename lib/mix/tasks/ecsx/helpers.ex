@@ -27,7 +27,7 @@ defmodule Mix.Tasks.ECSx.Helpers do
   def write_file(contents, path), do: File.write!(path, contents)
 
   def inject_component_module_into_manager(component_type) do
-    manager_path = "lib/#{otp_app()}/manager.ex"
+    manager_path = ECSx.manager_path()
     {before_components, after_components, list} = parse_manager_components(manager_path)
 
     new_list =
@@ -74,8 +74,17 @@ defmodule Mix.Tasks.ECSx.Helpers do
 
   def read_manager_file!(path) do
     case File.read(path) do
-      {:ok, file} -> file
-      {:error, :enoent} -> Mix.raise("ECSx manager missing - please run `mix ecsx.setup` first!")
+      {:ok, file} ->
+        file
+
+      {:error, :enoent} ->
+        Mix.raise("""
+        ECSx manager missing - please run `mix ecsx.setup` first!
+        If you've already run the setup but moved or renamed your
+        manager file, you might need to configure the path:
+
+        config :ecsx, manager: {ManagerModule, path: "path/to/manager.ex"}
+        """)
     end
   end
 end
