@@ -9,6 +9,5 @@ To demonstrate ECSx in a real-time application, we're going to make a game where
 * Add `{:ecsx, "~> 0.3"}` to your `mix.exs` deps
 * Run `mix deps.get`
 * Run `mix ecsx.setup`
-* Add `Ship.Manager` to your app's supervision tree
 
 

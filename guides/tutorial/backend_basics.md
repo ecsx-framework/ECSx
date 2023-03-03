@@ -354,14 +354,14 @@ end
 
 In this example we remove all the components the entity might have, then add a new DestroyedAt component with the current timestamp.  If we wanted some components to persist - such as the position and/or velocity, so the wreckage could still be visible on the player displays - we could keep them around and possibly have another system clean them up later on.  Likewise if there were other components to add, such as a `RespawnTimer` or `FinalScore`, we could add them here as well.
 
-## Initializing Components
+## Initializing Component Data
 
 By now you might be wondering "How did those components get created in the first place?"  We have code for adding `AttackCooldown` and `DestroyedAt`, when needed, but the basic components for the ships still need to be added before the game can even start.  For that, we'll check out `lib/ship/manager.ex`:
 
 ```elixir
 defmodule Ship.Manager do
   ...
-  use ECSx.Manager, tick_rate: 20
+  use ECSx.Manager
 
   setup do
     # Load your initial components
@@ -377,7 +377,7 @@ defmodule Ship.Manager do
 end
 ```
 
-This module holds four critical pieces of data - the server's tick rate, data initialization, a list of every valid component type, and a list of each game system in the order they are to be run.  Let's initialize some ship data inside the `setup` block:
+This module holds three critical pieces of data - component setup, a list of every valid component type, and a list of each game system in the order they are to be run.  Let's create some ship components inside the `setup` block:
 
 ```elixir
 setup do

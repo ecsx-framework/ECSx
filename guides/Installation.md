@@ -56,19 +56,4 @@ With ECSx installed, you can run the setup generator:
 $ mix ecsx.setup
 ```
 
-which will create the Manager, and two folders to get your project started.
-
-You'll also need to add the Manager to your application's supervision tree:
-
-```elixir
-def start(_type, _args) do
-  children = [
-    MyApp.Manager
-  ]
-
-  opts = [strategy: :one_for_one, name: MyApp.Supervisor]
-  Supervisor.start_link(children, opts)
-end
-```
-
-You should now have everything you need to start building!
+which will create the Manager, and two folders to get your project started.  You should now have everything you need to start building!
