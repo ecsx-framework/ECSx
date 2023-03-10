@@ -38,6 +38,7 @@ defmodule ECSx.MixHelper do
     File.mkdir!("lib")
     File.mkdir!("lib/my_app")
     File.mkdir!("lib/my_app/components")
+    Application.put_env(:ecsx, :manager, MyApp.Manager)
     File.write!("mix.exs", @sample_mixfile)
 
     source = Application.app_dir(:ecsx, "/priv/templates/manager.ex")
@@ -55,6 +56,7 @@ defmodule ECSx.MixHelper do
   def clean_tmp_dir do
     File.cd!("..")
     File.rm_rf!("tmp")
+    Application.delete_env(:ecsx, :manager)
   end
 
   def sample_mixfile, do: @sample_mixfile

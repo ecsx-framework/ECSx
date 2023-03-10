@@ -20,18 +20,6 @@ end
 
 * Run `mix deps.get`
 * Run `mix ecsx.setup`
-* Add the generated Manager module to your application's supervision tree:
-
-```elixir
-def start(_type, _args) do
-  children = [
-    MyApp.Manager
-  ]
-
-  opts = [strategy: :one_for_one, name: MyApp.Supervisor]
-  Supervisor.start_link(children, opts)
-end
-```
 
 ## Tutorial Project
 

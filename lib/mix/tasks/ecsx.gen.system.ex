@@ -42,7 +42,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   end
 
   defp inject_system_module_into_manager(system_name) do
-    manager_path = "lib/#{Helpers.otp_app()}/manager.ex"
+    manager_path = ECSx.manager_path()
     {before_systems, after_systems, list} = parse_manager(manager_path)
 
     new_list =
