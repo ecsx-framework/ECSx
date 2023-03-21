@@ -1,0 +1,11 @@
+defmodule MyApp.Constants.FooConstant do
+  @moduledoc """
+  Documentation for FooConstant.
+  """
+  use ECSx.Constant,
+    values: %{
+      1 => "foo",
+      2 => "bar",
+      3 => "baz"
+    }
+end

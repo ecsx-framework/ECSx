@@ -14,19 +14,25 @@ First let's consider the basic properties of a ship:
   * X Velocity:  The speed at which the ship is moving, horizontally
   * Y Velocity:  The speed at which the ship is moving, vertically
 
-We'll start by creating `integer` component types for each one of these, except AttackSpeed, which will use `float`:
+Some of these properties will be frequently updated, such as position, velocity, and current HP.  For these, we'll generate components which store integer values:
 
     $ mix ecsx.gen.component HullPoints integer
-    $ mix ecsx.gen.component ArmorRating integer
-    $ mix ecsx.gen.component AttackDamage integer
-    $ mix ecsx.gen.component AttackRange integer
     $ mix ecsx.gen.component XPosition integer
     $ mix ecsx.gen.component YPosition integer
     $ mix ecsx.gen.component XVelocity integer
     $ mix ecsx.gen.component YVelocity integer
-    $ mix ecsx.gen.component AttackSpeed float
 
-For now, this is all we need to do.  The ECSx generator has automatically set you up with modules for each component type, complete with a simple interface for handling the components.  We'll see this in action soon.
+Other properties will remain somewhat constant;  we have a specific generator for this case:
+
+    $ mix ecsx.gen.constant MaxHullPoints player:75 npc:50
+    $ mix ecsx.gen.constant ArmorRating player:2 npc:0
+    $ mix ecsx.gen.constant AttackDamage player:6 npc:5
+    $ mix ecsx.gen.constant AttackRange player:15 npc:10
+    $ mix ecsx.gen.constant AttackSpeed player:1.2 npc:1.05
+
+[How to know whether player or npc though???]
+
+For now, this is all we need to do.  The ECSx generator has automatically set you up with modules for each component/constant type, complete with a simple interface for handling them.  We'll see this in action soon.
 
 ## Our First System
 
@@ -142,10 +148,10 @@ defmodule Ship.Systems.Targeting do
   ...
   use ECSx.System
 
-  alias Ship.Components.AttackRange
   alias Ship.Components.AttackTarget
   alias Ship.Components.HullPoints
   alias Ship.Components.SeekingTarget
+  alias Ship.Constants.AttackRange
   alias Ship.SystemUtils
 
   def run do
@@ -162,15 +168,15 @@ defmodule Ship.Systems.Targeting do
   end 
 
   defp look_for_target(self) do
+    pc_or_npc = PlayerType.get(self)
+    range = AttackRange.get(pc_or_npc)
+
     # For now, we're assuming anything which has HullPoints can be attacked
     HullPoints.get_all()
     # ... except your own ship!
     |> Enum.reject(fn {possible_target, _hp} -> possible_target == self end)
     |> Enum.find(fn {possible_target, _hp} ->
-      distance_between = SystemUtils.distance_between(possible_target, self)
-      range = AttackRange.get_one(self)
-
-      distance_between < range
+      SystemUtils.distance_between(possible_target, self) < range
     end)
   end
 

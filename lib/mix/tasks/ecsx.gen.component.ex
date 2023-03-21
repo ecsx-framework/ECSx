@@ -44,8 +44,21 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
   def run([component_type_name, value_type | opts]) do
     value_type = validate(value_type)
     {opts, _, _} = OptionParser.parse(opts, strict: [unique: :boolean])
+
     Helpers.inject_component_module_into_manager(component_type_name)
-    create_component_file(component_type_name, value_type, opts)
+
+    filename = Macro.underscore(component_type_name)
+    target = "lib/#{Helpers.otp_app()}/components/#{filename}.ex"
+    source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
+
+    binding = [
+      app_name: Helpers.root_module(),
+      unique: Keyword.get(opts, :unique, true),
+      component_type: component_type_name,
+      value: value_type
+    ]
+
+    Mix.Generator.create_file(target, EEx.eval_file(source, binding))
   end
 
   defp message_with_help(message) do
@@ -65,19 +78,4 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
 
   defp validate(_),
     do: Mix.raise("Invalid value type. Possible types are: #{inspect(@valid_value_types)}")
-
-  defp create_component_file(component_type_name, value_type, opts) do
-    filename = Macro.underscore(component_type_name)
-    target = "lib/#{Helpers.otp_app()}/components/#{filename}.ex"
-    source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
-
-    binding = [
-      app_name: Helpers.root_module(),
-      unique: Keyword.get(opts, :unique, true),
-      component_type: component_type_name,
-      value: value_type
-    ]
-
-    Mix.Generator.create_file(target, EEx.eval_file(source, binding))
-  end
 end

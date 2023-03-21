@@ -1,7 +1,11 @@
 defmodule ECSx.ComponentTest do
   use ExUnit.Case
 
-  alias ECSx.StringComponent
+  defmodule StringComponent do
+    use ECSx.Component,
+      value: :binary,
+      unique: true
+  end
 
   describe "__using__" do
     test "generates functions for a component type" do

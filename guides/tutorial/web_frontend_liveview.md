@@ -143,8 +143,6 @@ defmodule Ship.Systems.ClientEventHandler do
   end
 
   defp process_one(player, :spawn_ship) do
-    # We'll give player ships better stats than the enemy ships
-    # (otherwise the game would be very short!)
     ArmorRating.add(player, 2)
     AttackDamage.add(player, 6)
     AttackRange.add(player, 15)

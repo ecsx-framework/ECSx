@@ -1,7 +1,11 @@
 defmodule ECSx.SystemTest do
   use ExUnit.Case
 
-  alias ECSx.IntegerComponent
+  defmodule IntegerComponent do
+    use ECSx.Component,
+      value: :integer,
+      unique: true
+  end
 
   defmodule Incrementer do
     use ECSx.System

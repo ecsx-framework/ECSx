@@ -31,17 +31,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
     if Keyword.get(opts, :folders, true),
       do: create_folders()
 
-    Mix.shell().info("""
-
-    Next you must add the manager to your supervision tree in application.ex:
-        def start(_type, _args) do
-          children = [
-            ...
-            #{Helpers.root_module()}.Manager,
-            ...
-          ]
-        end
-    """)
+    Mix.shell().info("ECSx setup complete!")
   end
 
   defp create_manager do
@@ -81,6 +71,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
     otp_app = Helpers.otp_app()
     create_directory("lib/#{otp_app}/components")
     create_directory("lib/#{otp_app}/systems")
+    create_directory("lib/#{otp_app}/constants")
   end
 
   embed_template(
