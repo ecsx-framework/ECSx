@@ -7,6 +7,7 @@ To demonstrate ECSx in a real-time application, we're going to make a game where
 * First, ensure you have installed [Elixir](https://elixir-lang.org/install.html) and [Phoenix](https://hexdocs.pm/phoenix/installation.html).
 * Create the application by running `mix phx.new ship`
 * Add `{:ecsx, "~> 0.3"}` to your `mix.exs` deps
+* Add `{:ecto, "~> 3.9"}` to your `mix.exs` deps (for `Ecto.UUID.generate()`)
 * Run `mix deps.get`
 * Run `mix ecsx.setup`
 
