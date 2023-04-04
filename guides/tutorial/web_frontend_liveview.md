@@ -365,7 +365,11 @@ For other ships, we'll need a new assign to hold that data - ID and coordinates,
 
 Lastly, we'll put an HP display near the top-left corner.
 
-Next is to update our LiveView with these new assigns:
+Lets first create an `ImageFile` component:
+
+    $ mix ecsx.gen.component ImageFile binary
+
+Next step is to update our LiveView with these new assigns:
 
 ```elixir
 defmodule ShipWeb.GameLive do
