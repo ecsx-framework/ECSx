@@ -214,6 +214,9 @@ end
 
 Now we'll update our LiveView to use a new `@loading` assign which is initially set to `true`, then set to `false` after the ship is spawned and the data is loaded for the first time.
 
+Replace both the current `mount` and `handle_info` functions with the below functions, and replace the existing `render` function
+with the new `render` function below 
+
 ```elixir
 defmodule ShipWeb.GameLive do
   ...
@@ -283,6 +286,7 @@ defmodule ShipWeb.GameLive do
     assign(socket, x_coord: x, y_coord: y, current_hp: hp)
   end
 
+  def handle_event("keydown", %{"key" => key}, socket) do
   ...
 
   def render(assigns) do
@@ -426,7 +430,16 @@ defmodule ShipWeb.GameLive do
 
     {:noreply, socket}
   end
-  ...
+
+  defp wait_for_spawn(player_entity) do
+    if PlayerSpawned.exists?(player_entity) do
+      :ok
+    else
+      Process.sleep(10)
+      wait_for_spawn(player_entity)
+    end
+  end
+
   defp assign_player_ship(socket) do
     x = XPosition.get_one(socket.assigns.player_entity)
     y = YPosition.get_one(socket.assigns.player_entity)
@@ -470,6 +483,9 @@ defmodule ShipWeb.GameLive do
       offset -> offset
     end
   end
+
+  def handle_event("keydown", %{"key" => key}, socket) do 
+  ...
 end
 ```
 
@@ -775,6 +791,7 @@ defmodule Ship.GameLive do
         href={Routes.static_path(@socket, "/images/" <> image_file)}
       />
     <% end %>
+    <%= for {_entity, x, y, image_file} <- @other_ships do %>
     ...
     """
   end
