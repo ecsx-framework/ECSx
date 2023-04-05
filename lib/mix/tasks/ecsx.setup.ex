@@ -31,17 +31,7 @@ defmodule Mix.Tasks.Ecsx.Setup do
     if Keyword.get(opts, :folders, true),
       do: create_folders()
 
-    Mix.shell().info("""
-
-    Next you must add the manager to your supervision tree in application.ex:
-        def start(_type, _args) do
-          children = [
-            ...
-            #{Helpers.root_module()}.Manager,
-            ...
-          ]
-        end
-    """)
+    Mix.shell().info("ECSx setup complete!")
   end
 
   defp create_manager do
