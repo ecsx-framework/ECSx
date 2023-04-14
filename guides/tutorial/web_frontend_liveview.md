@@ -606,6 +606,7 @@ defmodule Ship.Systems.Projectile do
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.HullPoints
+  alias Ship.Components.ImageFile
   alias Ship.Components.IsProjectile
   alias Ship.Components.ProjectileDamage
   alias Ship.Components.ProjectileTarget
@@ -671,7 +672,7 @@ defmodule Ship.Systems.Projectile do
   defp damage_target(projectile, target) do
     damage = ProjectileDamage.get_one(projectile)
     reduction_from_armor = ArmorRating.get_one(target)
-    final_damage_amount = amount - reduction_from_armor
+    final_damage_amount = damage - reduction_from_armor
 
     target_current_hp = HullPoints.get_one(target)
     target_new_hp = target_current_hp - final_damage_amount
