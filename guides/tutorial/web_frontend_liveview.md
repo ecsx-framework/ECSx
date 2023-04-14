@@ -142,7 +142,7 @@ defmodule Ship.Systems.ClientEventHandler do
     Enum.each(client_events, &process_one/1)
   end
 
-  defp process_one(player, :spawn_ship) do
+  defp process_one({player, :spawn_ship}) do
     # We'll give player ships better stats than the enemy ships
     # (otherwise the game would be very short!)
     ArmorRating.add(player, 2)
@@ -204,7 +204,7 @@ defmodule Ship.Systems.ClientEventHandler do
   ...
   alias Ship.Components.PlayerSpawned
   ...
-  defp process_one(player, :spawn_ship) do
+  defp process_one({player, :spawn_ship}) do
     ...
     PlayerSpawned.add(player)
   end
