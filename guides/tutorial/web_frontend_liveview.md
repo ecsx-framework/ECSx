@@ -26,7 +26,7 @@ First consider the goals for our frontend:
 
 When we need to write components, `ECSx.ClientEvents` will be our line of communication from the frontend to the backend.  
 
-Let's create `/lib/ship_web/game_live.ex` and put it to use:
+Let's create `/lib/ship_web/live/game_live.ex` and put it to use:
 
 ```elixir
 defmodule ShipWeb.GameLive do
