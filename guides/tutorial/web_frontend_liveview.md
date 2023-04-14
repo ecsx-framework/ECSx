@@ -178,7 +178,7 @@ Head into `router.ex` and look for the new scope which uses `:require_authentica
 scope "/", ShipWeb do
   pipe_through [:browser, :require_authenticated_player]
 
-  live "/game", ShipWeb.GameLive
+  live "/game", GameLive
   ...
 end
 ```
