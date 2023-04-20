@@ -34,35 +34,27 @@ defmodule ECSx.Manager do
       def init(_) do
         Enum.each(components(), fn module -> module.init() end)
 
-        max_tick = ECSx.Manager.final_tick(systems())
-
         {:ok, max_tick, {:continue, :setup}}
       end
 
       def handle_continue(:start_systems, max_tick) do
-        tick_rate = ECSx.tick_rate()
-        tick_interval = div(1000, tick_rate)
+        tick_interval = div(1000, ECSx.tick_rate())
         :timer.send_interval(tick_interval, :tick)
 
-        {:noreply, {0, max_tick}}
+        {:noreply, []}
       end
 
-      def handle_info(:tick, {current, max}) do
+      def handle_info(:tick, state) do
         Enum.each(systems(), fn system ->
-          if rem(current, system.__period__()) == 0 do
-            start_time = System.monotonic_time()
-            system.run()
-            duration = System.monotonic_time() - start_time
-            measurements = %{duration: duration}
-            metadata = %{system: system}
-            :telemetry.execute([:ecsx, :system_run], measurements, metadata)
-          end
+          start_time = System.monotonic_time()
+          system.run()
+          duration = System.monotonic_time() - start_time
+          measurements = %{duration: duration}
+          metadata = %{system: system}
+          :telemetry.execute([:ecsx, :system_run], measurements, metadata)
         end)
 
-        case current + 1 do
-          ^max -> {:noreply, {0, max}}
-          next -> {:noreply, {next, max}}
-        end
+        {:noreply, state}
       end
     end
   end
@@ -109,14 +101,4 @@ defmodule ECSx.Manager do
   def start_link(module) do
     GenServer.start_link(module, [], name: module)
   end
-
-  @doc false
-  def final_tick(systems) do
-    systems
-    |> Enum.map(fn system -> system.__period__() end)
-    |> lcm()
-  end
-
-  defp lcm(nums) when is_list(nums), do: Enum.reduce(nums, &lcm/2)
-  defp lcm(a, b), do: div(abs(a * b), Integer.gcd(a, b))
 end
