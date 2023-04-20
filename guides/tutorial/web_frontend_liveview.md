@@ -522,7 +522,7 @@ Currently the most challenging part of the game is knowing when your ship is att
   * The new assign will be used to create SVG elements
   * To help fetch locations for projectiles only, we'll add an `IsProjectile` tag
 
-Start by running the generator commands for our new components, systems, and tag:
+Start by running the generator commands for our new components, system, and tag:
 
     $ mix ecsx.gen.component ProjectileTarget binary
     $ mix ecsx.gen.component ProjectileDamage integer
@@ -586,6 +586,7 @@ defmodule Ship.Systems.Projectile do
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.HullPoints
+  alias Ship.Components.ImageFile
   alias Ship.Components.IsProjectile
   alias Ship.Components.ProjectileDamage
   alias Ship.Components.ProjectileTarget
