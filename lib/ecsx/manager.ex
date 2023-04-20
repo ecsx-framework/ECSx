@@ -34,14 +34,14 @@ defmodule ECSx.Manager do
       def init(_) do
         Enum.each(components(), fn module -> module.init() end)
 
-        {:ok, max_tick, {:continue, :setup}}
+        {:ok, [], {:continue, :setup}}
       end
 
-      def handle_continue(:start_systems, max_tick) do
+      def handle_continue(:start_systems, state) do
         tick_interval = div(1000, ECSx.tick_rate())
         :timer.send_interval(tick_interval, :tick)
 
-        {:noreply, []}
+        {:noreply, state}
       end
 
       def handle_info(:tick, state) do
