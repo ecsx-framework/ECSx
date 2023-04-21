@@ -48,13 +48,14 @@ Head over to the generated file `lib/ship/systems/driver.ex` and we'll add some 
 ```elixir
 defmodule Ship.Systems.Driver do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.XPosition
   alias Ship.Components.YPosition
   alias Ship.Components.XVelocity
   alias Ship.Components.YVelocity
 
+  @impl ECSx.System
   def run do
     for {entity, x_velocity} <- XVelocity.get_all() do
       x_position = XPosition.get_one(entity)
@@ -140,7 +141,7 @@ Now we're onto the Targeting system, which operates only on entities with the Se
 ```elixir
 defmodule Ship.Systems.Targeting do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.AttackRange
   alias Ship.Components.AttackTarget
@@ -148,6 +149,7 @@ defmodule Ship.Systems.Targeting do
   alias Ship.Components.SeekingTarget
   alias Ship.SystemUtils
 
+  @impl ECSx.System
   def run do
     entities = SeekingTarget.get_all()
 
@@ -188,7 +190,7 @@ The Attacking system will also check distance, but only to the target ship, in c
 ```elixir
 defmodule Ship.Systems.Attacking do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.AttackCooldown
@@ -200,6 +202,7 @@ defmodule Ship.Systems.Attacking do
   alias Ship.Components.SeekingTarget
   alias Ship.SystemUtils
   
+  @impl ECSx.System
   def run do
     attack_targets = AttackTarget.get_all()
 
@@ -266,10 +269,11 @@ Our attacking system will add a cooldown with an expiration timestamp, but the n
 ```elixir
 defmodule Ship.Systems.CooldownExpiration do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.AttackCooldown
 
+  @impl ECSx.System
   def run do
     now = DateTime.utc_now()
     cooldowns = AttackCooldown.get_all()
@@ -299,7 +303,7 @@ Next let's handle what happens when a ship has its HP reduced to zero or less:
 ```elixir
 defmodule Ship.Systems.Destruction do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.AttackCooldown
@@ -315,6 +319,7 @@ defmodule Ship.Systems.Destruction do
   alias Ship.Components.YPosition
   alias Ship.Components.YVelocity
 
+  @impl ECSx.System
   def run do
     ships = HullPoints.get_all()
 

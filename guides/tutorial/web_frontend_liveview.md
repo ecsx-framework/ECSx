@@ -123,7 +123,7 @@ Finally, spin up a new system for handling the events:
 ```elixir
 defmodule Ship.Systems.ClientEventHandler do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.AttackDamage
@@ -136,6 +136,7 @@ defmodule Ship.Systems.ClientEventHandler do
   alias Ship.Components.YPosition
   alias Ship.Components.YVelocity
 
+  @impl ECSx.System
   def run do
     client_events = ECSx.ClientEvents.get_and_clear()
 
@@ -554,7 +555,7 @@ Then we need to update the `Attacking` system to spawn projectiles instead of im
 ```elixir
 defmodule Ship.Systems.Attacking do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.AttackCooldown
   alias Ship.Components.AttackDamage
@@ -602,7 +603,7 @@ Notice we didn't worry about setting the velocity, because that will be handled 
 ```elixir
 defmodule Ship.Systems.Projectile do
   ...
-  use ECSx.System
+  @behaviour ECSx.System
 
   alias Ship.Components.ArmorRating
   alias Ship.Components.HullPoints
@@ -617,6 +618,7 @@ defmodule Ship.Systems.Projectile do
 
   @cannonball_speed 3
 
+  @impl ECSx.System
   def run do
     projectiles = IsProjectile.get_all()
       

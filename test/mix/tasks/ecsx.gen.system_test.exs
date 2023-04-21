@@ -23,8 +23,9 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                  @moduledoc \"\"\"
                  Documentation for FooSystem system.
                  \"\"\"
-                 use ECSx.System
+                 @behaviour ECSx.System
 
+                 @impl ECSx.System
                  def run do
                    # System logic
                    :ok

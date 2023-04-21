@@ -4,7 +4,7 @@ defmodule ECSx.SystemTest do
   alias ECSx.IntegerComponent
 
   defmodule Incrementer do
-    use ECSx.System
+    @behaviour ECSx.System
 
     @impl ECSx.System
     def run do
