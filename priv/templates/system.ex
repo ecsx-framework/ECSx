@@ -6,5 +6,6 @@ defmodule <%= app_name %>.Systems.<%= system_name %> do
 
   def run do
     # System logic
+    :ok
   end
 end

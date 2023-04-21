@@ -27,6 +27,7 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
 
                  def run do
                    # System logic
+                   :ok
                  end
                end
                """
