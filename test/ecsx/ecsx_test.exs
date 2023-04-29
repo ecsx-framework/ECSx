@@ -1,5 +1,5 @@
 defmodule ECSxTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   describe "manager/0" do
     test "standard module" do

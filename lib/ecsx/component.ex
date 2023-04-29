@@ -34,6 +34,7 @@ defmodule ECSx.Component do
       @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
       @valid_value_types ~w(atom binary datetime float integer)a
+      @component_opts [log_edits: opts[:log_edits] || false]
 
       @table_type (case(Keyword.get(opts, :unique, true)) do
                      true ->
@@ -75,21 +76,28 @@ defmodule ECSx.Component do
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
 
-      def add(entity_id, value) when ecsx_type_guard(value),
-        do: ECSx.Base.add(@table_name, {entity_id, value})
+      def add(entity_id, value, opts \\ []) when ecsx_type_guard(value),
+        do: ECSx.Base.add(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
 
-      def get_one(key), do: ECSx.Base.get_one(@table_name, key)
+      def load(component), do: ECSx.Base.load(@table_name, component)
+
+      def update(entity_id, value) when ecsx_type_guard(value),
+        do: ECSx.Base.update(@table_name, entity_id, value, @component_opts)
+
+      def get_one(key, default \\ :raise), do: ECSx.Base.get_one(@table_name, key, default)
 
       def get_all, do: ECSx.Base.get_all(@table_name)
 
       def get_all(key), do: ECSx.Base.get_all(@table_name, key)
 
+      def get_all_persist, do: ECSx.Base.get_all_persist(@table_name)
+
       def search(value), do: ECSx.Base.search(@table_name, value)
 
-      def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id)
+      def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id, @component_opts)
 
       def remove_one(entity_id, value),
-        do: ECSx.Base.remove_one(@table_name, entity_id, value)
+        do: ECSx.Base.remove_one(@table_name, entity_id, value, @component_opts)
 
       def exists?(entity_id), do: ECSx.Base.exists?(@table_name, entity_id)
     end
