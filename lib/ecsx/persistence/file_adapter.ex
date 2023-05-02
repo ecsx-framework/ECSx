@@ -1,4 +1,6 @@
 defmodule ECSx.Persistence.FileAdapter do
+  @moduledoc false
+
   @behaviour ECSx.Persistence.Behaviour
 
   @default_file_location "components.persistence"

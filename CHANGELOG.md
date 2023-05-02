@@ -6,9 +6,17 @@ Adding ECSx.ClientEvents to your supervision tree is no longer required
 Adding the manager to your supervision tree is no longer required  
 Running a generator before ecsx.setup will now raise an error   
 Added telemetry events  
+Added component persistence, by default saving a binary file to disk  
+Persistence file is loaded on app startup  
+The interval between saves can be set via application config  
 Tick rate is now set in application config  
 Manager module (and optional custom path) are now defined in application config  
-Added functions `tick_rate/0`, `manager/0`, and `manager_path/0` to the `ECSx` module for reading the configured values at runtime  
+Added functions `tick_rate/0`, `manager/0`, `persist_interval/0`, and `manager_path/0` to the `ECSx` module for reading the configured values at runtime  
+Added callback `add/3` for components and tags, which accepts `persist: true` option, marking the component/tag for persistence across app reboots  
+`get_one/1` now raises an error if no results are found  
+Added `Component` callback `get_one/2` which accepts a default value to return if no results are found  
+`add/{2,3}` now raises if `unique: true` and the component already exists  
+Added `Component` callback `update/2` for updating an existing component's value, while maintaining the previously set `:persist` option  
 
 ## v0.3.1 (2023-01-12)
 

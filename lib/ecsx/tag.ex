@@ -30,7 +30,7 @@ defmodule ECSx.Tag do
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
 
       def add(entity_id, opts \\ []),
-        do: ECSx.Base.add(@table_name, entity_id, nil, Keyword.merge(opts, @tag_opts))
+        do: ECSx.Base.add_new(@table_name, entity_id, nil, Keyword.merge(opts, @tag_opts))
 
       def load(component), do: ECSx.Base.load(@table_name, component)
 
