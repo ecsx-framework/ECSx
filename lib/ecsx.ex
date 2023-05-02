@@ -16,7 +16,7 @@ defmodule ECSx do
 
   @doc false
   def start(_type, _args) do
-    children = [ECSx.ClientEvents] ++ List.wrap(ECSx.manager() || [])
+    children = [ECSx.ClientEvents, ECSx.Persistence.Server] ++ List.wrap(ECSx.manager() || [])
 
     Supervisor.start_link(children, strategy: :one_for_one, name: ECSx.Supervisor)
   end
@@ -86,5 +86,10 @@ defmodule ECSx do
   @spec tick_rate() :: integer()
   def tick_rate do
     Application.get_env(:ecsx, :tick_rate, 20)
+  end
+
+  @spec persist_interval() :: integer()
+  def persist_interval do
+    Application.get_env(:ecsx, :persist_interval, :timer.seconds(15))
   end
 end

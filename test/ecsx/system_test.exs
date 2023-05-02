@@ -25,13 +25,13 @@ defmodule ECSx.SystemTest do
     test "#run/0" do
       Incrementer.run()
 
-      assert :ets.lookup(IntegerComponent, 1) == [{1, 2}]
-      assert :ets.lookup(IntegerComponent, 100) == [{100, 101}]
+      assert :ets.lookup(IntegerComponent, 1) == [{1, 2, false}]
+      assert :ets.lookup(IntegerComponent, 100) == [{100, 101, false}]
 
       Incrementer.run()
 
-      assert :ets.lookup(IntegerComponent, 1) == [{1, 3}]
-      assert :ets.lookup(IntegerComponent, 100) == [{100, 102}]
+      assert :ets.lookup(IntegerComponent, 1) == [{1, 3, false}]
+      assert :ets.lookup(IntegerComponent, 100) == [{100, 102, false}]
     end
   end
 end

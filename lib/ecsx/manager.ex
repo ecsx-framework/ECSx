@@ -29,17 +29,43 @@ defmodule ECSx.Manager do
 
       import ECSx.Manager
 
+      @behaviour ECSx.Manager
+
+      require Logger
+
+      def setup, do: :ok
+      def startup, do: :ok
+      defoverridable setup: 0, startup: 0
+
       def start_link(_), do: ECSx.Manager.start_link(__MODULE__)
 
       def init(_) do
         Enum.each(components(), fn module -> module.init() end)
 
-        {:ok, [], {:continue, :setup}}
+        {:ok, [], {:continue, :start_systems}}
       end
 
       def handle_continue(:start_systems, state) do
+        case ECSx.Persistence.retrieve_components() do
+          :ok ->
+            Logger.info("Retrieved Components")
+            startup()
+
+          {:error, :fresh_server} ->
+            Logger.info("Fresh server detected")
+
+            setup()
+            startup()
+
+          {:error, reason} ->
+            Logger.warn("Failed to retrieve components: #{inspect(reason)}")
+            setup()
+            startup()
+        end
+
         tick_interval = div(1000, ECSx.tick_rate())
         :timer.send_interval(tick_interval, :tick)
+        :timer.send_interval(ECSx.persist_interval(), :persist)
 
         {:noreply, state}
       end
@@ -56,15 +82,22 @@ defmodule ECSx.Manager do
 
         {:noreply, state}
       end
+
+      def handle_info(:persist, state) do
+        ECSx.Persistence.persist_components()
+        {:noreply, state}
+      end
     end
   end
 
   @doc """
-  Runs the given code block during startup.
+  `setup` and `startup`
+  The setup function runs during the *first* server startup. The `startup` function runs during *every* server startup,
+  including the first server startup (after `setup` is run). The manager uses the Persistence layer to determine if this
+  is a fresh server or a subsequent start.
 
-  The code will be run during the Manager's initialization (so pay special attention to the
-  position of `ECSx.Manager` in your application's supervision tree). The Component tables will
-  be created before `setup` is executed.
+  The functions will be run during the Manager's initialization. The Component tables will be created before they are
+  executed.
 
   ## Example
 
@@ -72,30 +105,35 @@ defmodule ECSx.Manager do
   defmodule YourApp.Manager do
     use ECSx.Manager
 
-    setup do
-      for npc <- YourApp.fetch_npc_spawn_info() do
-        YourApp.Components.Name.add(npc.id, npc.name)
-        YourApp.Components.HitPoints.add(npc.id, npc.hp)
-        YourApp.Components.Location.add(npc.id, npc.spawn_location)
+    def setup do
+      for tree <- YourApp.Map.trees() do
+        YourApp.Components.Location.add(tree.id, tree.location)
+        YourApp.Components.Type.add(tree.id, "Tree")
       end
+      for rock <- YourApp.Map.rocks() do
+        YourApp.Components.Location.add(rock.id, rock.location)
+        YourApp.Components.Type.add(rock.id, "Rock")
+      end
+
+      :ok
+    end
+
+    def startup do
+      for spawn_location <- YourApp.spawn_locations() do
+        YourApp.Components.SpawnLocation.add(spawn_location.id)
+        YourApp.Components.Type.add(spawn_location.id, spawn_location.type)
+        YourApp.Components.Location.add(spawn_location.id, spawn_location.spawn_location)
+      end
+
+      :ok
     end
   end
   ```
 
   This setup will spawn each NPC with Components for Name, HitPoints, and Location.
   """
-  defmacro setup(block) do
-    do_setup(block)
-  end
-
-  defp do_setup(do: contents) do
-    quote do
-      def handle_continue(:setup, state) do
-        unquote(contents)
-        {:noreply, state, {:continue, :start_systems}}
-      end
-    end
-  end
+  @callback setup() :: :ok
+  @callback startup() :: :ok
 
   @doc false
   def start_link(module) do

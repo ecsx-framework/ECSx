@@ -15,7 +15,8 @@ defmodule ECSx.MixProject do
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        coverage_report: :test
       ],
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -26,7 +27,8 @@ defmodule ECSx.MixProject do
 
       # Docs
       name: "ECSx",
-      docs: docs()
+      docs: docs(),
+      aliases: aliases()
     ]
   end
 
@@ -44,13 +46,20 @@ defmodule ECSx.MixProject do
       {:ex_doc, "~> 0.29", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.14", only: :test},
-      {:telemetry, "~> 1.0"}
+      {:telemetry, "~> 1.0"},
+      {:mix_test_watch, "~> 1.1", only: [:dev], runtime: false}
     ]
   end
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  def aliases do
+    [
+      coverage_report: [&coverage_report/1]
+    ]
+  end
 
   defp package do
     [
@@ -83,6 +92,24 @@ defmodule ECSx.MixProject do
       "guides/tutorial/backend_basics.md",
       "guides/tutorial/web_frontend_liveview.md"
     ]
+  end
+
+  defp coverage_report(_) do
+    Mix.Task.run("coveralls.html")
+
+    open_cmd =
+      case :os.type() do
+        {:win32, _} ->
+          "start"
+
+        {:unix, :darwin} ->
+          "open"
+
+        {:unix, _} ->
+          "xdg-open"
+      end
+
+    System.cmd(open_cmd, ["cover/excoveralls.html"])
   end
 
   defp groups_for_extras do
