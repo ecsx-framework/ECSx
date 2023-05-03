@@ -60,16 +60,14 @@ defmodule Ship.Systems.Driver do
     for {entity, x_velocity} <- XVelocity.get_all() do
       x_position = XPosition.get_one(entity)
       new_x_position = x_position + x_velocity
-      # By default, an entity can only have one component of each type.  
-      # Adding a second will overwrite the first.
-      XPosition.add(entity, new_x_position)
+      XPosition.update(entity, new_x_position)
     end
 
     # Once the x-values are updated, do the same for the y-values
     for {entity, y_velocity} <- YVelocity.get_all() do
       y_position = YPosition.get_one(entity)
       new_y_position = y_position + y_velocity
-      YPosition.add(entity, new_y_position)
+      YPosition.update(entity, new_y_position)
     end
 
     # run/0 should always return :ok
@@ -236,7 +234,7 @@ defmodule Ship.Systems.Attacking do
     target_current_hp = HullPoints.get_one(target)
     target_new_hp = target_current_hp - final_damage_amount
 
-    HullPoints.add(target, target_new_hp)
+    HullPoints.update(target, target_new_hp)
   end
 
   defp add_cooldown(self) do
@@ -258,7 +256,7 @@ defmodule Ship.Systems.Attacking do
 end
 ```
 
-Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/0` to fetch the list of all relevant entities, then `get_one/1` and `exists?/1` to check specific attributes of the entities, and finally `add/2` for creating new components, or overwriting existing ones.  We're also starting to see the use of `remove/1` for excluding an entity from game logic which is no longer necessary.
+Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/0` to fetch the list of all relevant entities, then `get_one/1` and `exists?/1` to check specific attributes of the entities, `add/2` for creating new components, and `update/2` for overwriting existing ones.  We're also starting to see the use of `remove/1` for excluding an entity from game logic which is no longer necessary.
 
 ## Cooldowns
 
@@ -399,6 +397,8 @@ setup do
     Ship.Components.SeekingTarget.add(entity)
     Ship.Components.XPosition.add(entity, Enum.random(1..100))
     Ship.Components.YPosition.add(entity, Enum.random(1..100))
+    Ship.Components.XVelocity.add(entity, 0)
+    Ship.Components.YVelocity.add(entity, 0)
   end
 end
 ```
