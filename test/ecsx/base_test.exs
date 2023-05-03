@@ -3,11 +3,26 @@ defmodule ECSx.BaseTest do
 
   alias ECSx.Base
 
-  describe "#add/2" do
+  describe "#add/4" do
+    setup :setup_nonunique_component
+
+    test "successful" do
+      assert :ok == Base.add(:nonunique_component, 123, "test", [])
+      assert :ok == Base.add(:nonunique_component, 123, "test2", [])
+      assert :ok == Base.add(:nonunique_component, 123, "test2", [])
+
+      assert :ets.lookup(:nonunique_component, 123) == [
+               {123, "test", false},
+               {123, "test2", false}
+             ]
+    end
+  end
+
+  describe "#add_new/4" do
     setup :setup_component
 
     test "successful" do
-      Base.add(:sample_component, 123, "test", [])
+      Base.add_new(:sample_component, 123, "test", [])
 
       assert :ets.lookup(:sample_component, 123) == [{123, "test", false}]
     end
@@ -16,9 +31,9 @@ defmodule ECSx.BaseTest do
       :ets.insert(:sample_component, {123, "test", false})
 
       assert_raise ECSx.AlreadyExistsError,
-                   "add expects a value to not exist yet from entity 123\n",
+                   "`add` expects component to not exist yet from entity 123\n",
                    fn ->
-                     Base.add(:sample_component, 123, "test", [])
+                     Base.add_new(:sample_component, 123, "test", [])
                    end
     end
   end
@@ -34,7 +49,7 @@ defmodule ECSx.BaseTest do
 
     test "raises when doesn't exist" do
       assert_raise ECSx.NoResultsError,
-                   "update expects an existing value from entity 123\n",
+                   "`update` expects an existing value from entity 123\n",
                    fn ->
                      Base.update(:sample_component, 123, "test2", [])
                    end
@@ -56,7 +71,7 @@ defmodule ECSx.BaseTest do
 
     test "raises when component does not exist" do
       assert_raise ECSx.NoResultsError,
-                   "get_one expects one result, got 0 from entity 123\n",
+                   "`get_one` expects one result, got 0 from entity 123\n",
                    fn -> Base.get_one(:sample_component, 123, :raise) end
     end
 
@@ -64,7 +79,7 @@ defmodule ECSx.BaseTest do
       :ets.insert(:nonunique_component, {123, "uno"})
       :ets.insert(:nonunique_component, {123, "dos"})
 
-      message = "get_one expects one result, got 2 from entity 123\n"
+      message = "`get_one` expects one result, got 2 from entity 123\n"
 
       assert_raise ECSx.MultipleResultsError, message, fn ->
         Base.get_one(:nonunique_component, 123, [])
