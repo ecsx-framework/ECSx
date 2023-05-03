@@ -23,8 +23,8 @@ defmodule ECSx.Manager do
   for more information.
   """
 
-  defmacro __using__(opts) do
-    quote bind_quoted: [opts: opts] do
+  defmacro __using__(_opts) do
+    quote do
       use GenServer
 
       import ECSx.Manager
