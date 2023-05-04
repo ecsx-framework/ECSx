@@ -17,6 +17,8 @@ Added callback `add/3` for components and tags, which accepts `persist: true` op
 Added `Component` callback `get_one/2` which accepts a default value to return if no results are found  
 `add/{2,3}` now raises if `unique: true` and the component already exists  
 Added `Component` callback `update/2` for updating an existing component's value, while maintaining the previously set `:persist` option  
+Manager `setup` macro is now an optional callback `setup/0` which only runs once, at the server's first startup  
+Added a new Manager callback `startup/0` which runs every time the server starts  
 
 ## v0.3.1 (2023-01-12)
 

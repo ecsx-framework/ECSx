@@ -13,10 +13,10 @@ defmodule ECSx.PersistenceTest do
       ECSx.Persistence.persist_components(target: self())
 
       assert_receive {:persist_components,
-                      [
-                        {ECSx.MockComponent1, [{123, "foo", true}]},
-                        {ECSx.MockComponent2, [{345, "baz", true}]}
-                      ]}
+                      %{
+                        ECSx.MockComponent1 => [{123, "foo", true}],
+                        ECSx.MockComponent2 => [{345, "baz", true}]
+                      }}
     end
   end
 
@@ -26,10 +26,10 @@ defmodule ECSx.PersistenceTest do
     ECSx.MockComponent2.init()
 
     ECSx.Persistence.retrieve_components(
-      test_components: [
-        {ECSx.MockComponent1, [{123, "foo", true}]},
-        {ECSx.MockComponent2, [{345, "baz", true}]}
-      ]
+      test_components: %{
+        ECSx.MockComponent1 => [{123, "foo", true}],
+        ECSx.MockComponent2 => [{345, "baz", true}]
+      }
     )
 
     assert ECSx.MockComponent1.get_all() == [{123, "foo"}]

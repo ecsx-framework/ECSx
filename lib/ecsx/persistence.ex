@@ -5,6 +5,7 @@ defmodule ECSx.Persistence do
       {component_module, component_module.get_all_persist()}
     end)
     |> Enum.filter(&(length(elem(&1, 1)) > 0))
+    |> Map.new()
     |> ECSx.Persistence.Server.persist_components(opts)
   end
 
