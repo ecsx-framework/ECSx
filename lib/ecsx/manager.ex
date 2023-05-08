@@ -16,11 +16,47 @@ defmodule ECSx.Manager do
   the Component Types list is irrelevant, but the order of the Systems list is very important,
   because the Systems are run consecutively in the given order.
 
-  ## `setup` block
+  ## `setup/0` and `startup/0`
 
-  Another important piece of the Manager module is the `setup` block.  Here you can load
-  all the necessary data for your app before any Systems run or users connect.  See `setup/1`
-  for more information.
+  Manager modules may also implement two optional functions for loading all the necessary
+  component data for your app before any Systems run or users connect.
+
+  The `setup/0` function runs only *once*, when you start your app for the first time, while
+  the `startup/0` function runs *every* time the app starts, including the first
+  (after `setup/0` is run). The Manager uses the Persistence layer to determine if this
+  is a fresh server or a subsequent start.
+
+  These functions will be run during the Manager's initialization. The Component tables
+  will be created before they are executed.  Return value should be `:ok`
+
+  ## Example
+
+  ```
+  defmodule YourApp.Manager do
+    use ECSx.Manager
+
+    def setup do
+      for tree <- YourApp.Map.trees() do
+        YourApp.Components.XPosition.add(tree.id, tree.x_coord, persist: true)
+        YourApp.Components.YPosition.add(tree.id, tree.y_coord, persist: true)
+        YourApp.Components.Type.add(tree.id, "Tree", persist: true)
+      end
+
+      :ok
+    end
+
+    def startup do
+      for spawn_location <- YourApp.spawn_locations() do
+        YourApp.Components.SpawnLocation.add(spawn_location.id)
+        YourApp.Components.Type.add(spawn_location.id, spawn_location.type)
+        YourApp.Components.XPosition.add(spawn_location.id, spawn_location.x_coord)
+        YourApp.Components.YPosition.add(spawn_location.id, spawn_location.y_coord)
+      end
+
+      :ok
+    end
+  end
+  ```
   """
 
   defmacro __using__(_opts) do
@@ -41,6 +77,7 @@ defmodule ECSx.Manager do
 
       def init(_) do
         Enum.each(components(), fn module -> module.init() end)
+        Logger.info("Component tables initialized")
 
         {:ok, [], {:continue, :start_systems}}
       end
@@ -50,17 +87,22 @@ defmodule ECSx.Manager do
           :ok ->
             Logger.info("Retrieved Components")
             startup()
+            Logger.info("`startup/0` complete")
 
           {:error, :fresh_server} ->
             Logger.info("Fresh server detected")
 
             setup()
+            Logger.info("`setup/0` complete")
             startup()
+            Logger.info("`startup/0` complete")
 
           {:error, reason} ->
             Logger.warn("Failed to retrieve components: #{inspect(reason)}")
             setup()
+            Logger.info("`setup/0` complete")
             startup()
+            Logger.info("`startup/0` complete")
         end
 
         tick_interval = div(1000, ECSx.tick_rate())
@@ -91,48 +133,27 @@ defmodule ECSx.Manager do
   end
 
   @doc """
-  `setup` and `startup`
-  The setup function runs during the *first* server startup. The `startup` function runs during *every* server startup,
-  including the first server startup (after `setup` is run). The manager uses the Persistence layer to determine if this
-  is a fresh server or a subsequent start.
+  Loads component data for first app launch.
 
-  The functions will be run during the Manager's initialization. The Component tables will be created before they are
-  executed.
+  This will run only once, the first time you start your app.  It runs after component tables
+  have been initialized, before any systems have started.
 
-  ## Example
+  Except for very rare circumstances, all components added here should have `persist: true`
 
-  ```
-  defmodule YourApp.Manager do
-    use ECSx.Manager
-
-    def setup do
-      for tree <- YourApp.Map.trees() do
-        YourApp.Components.Location.add(tree.id, tree.location)
-        YourApp.Components.Type.add(tree.id, "Tree")
-      end
-      for rock <- YourApp.Map.rocks() do
-        YourApp.Components.Location.add(rock.id, rock.location)
-        YourApp.Components.Type.add(rock.id, "Rock")
-      end
-
-      :ok
-    end
-
-    def startup do
-      for spawn_location <- YourApp.spawn_locations() do
-        YourApp.Components.SpawnLocation.add(spawn_location.id)
-        YourApp.Components.Type.add(spawn_location.id, spawn_location.type)
-        YourApp.Components.Location.add(spawn_location.id, spawn_location.spawn_location)
-      end
-
-      :ok
-    end
-  end
-  ```
-
-  This setup will spawn each NPC with Components for Name, HitPoints, and Location.
+  Setup should return `:ok`
   """
   @callback setup() :: :ok
+
+  @doc """
+  Loads ephemeral component data each time the app is started.
+
+  This will run on your app's first start (after `setup/0`) and then again during all subsequent
+  app reboots.  It runs after component tables have been initialized, before any systems have started.
+
+  Except for very rare circumstances, components added here should *not* be persisted.
+
+  Startup should return `:ok`
+  """
   @callback startup() :: :ok
 
   @doc false

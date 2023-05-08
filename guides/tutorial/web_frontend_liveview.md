@@ -511,7 +511,7 @@ Next let's create the `ImageFile` components when a ship is spawned:
 ```elixir
 defmodule Ship.Manager do
   ...
-  setup do
+  def startup do
     for _ships <- 1..40 do
       ...
       Ship.Components.ImageFile.add(entity, "npc_ship.svg")

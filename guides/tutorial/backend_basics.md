@@ -366,8 +366,12 @@ defmodule Ship.Manager do
   ...
   use ECSx.Manager
 
-  setup do
-    # Load your initial components
+  def setup do
+    ...
+  end
+
+  def startup do
+    ...
   end
 
   def components do
@@ -380,10 +384,10 @@ defmodule Ship.Manager do
 end
 ```
 
-This module holds three critical pieces of data - component setup, a list of every valid component type, and a list of each game system in the order they are to be run.  Let's create some ship components inside the `setup` block:
+This module holds three critical pieces of data - component setup, a list of every valid component type, and a list of each game system in the order they are to be run.  Let's create some ship components inside the `startup` block:
 
 ```elixir
-setup do
+def startup do
   for _ships <- 1..40 do
     # First generate a unique ID to represent the new entity
     entity = Ecto.UUID.generate()
@@ -400,7 +404,9 @@ setup do
     Ship.Components.XVelocity.add(entity, 0)
     Ship.Components.YVelocity.add(entity, 0)
   end
+
+  :ok
 end
 ```
 
-Now when the server starts, there will be forty ships set up and ready to go.
+Now whenever the server starts, there will be forty ships set up and ready to go.

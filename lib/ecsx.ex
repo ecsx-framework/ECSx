@@ -15,7 +15,7 @@ defmodule ECSx do
   ## Configuration
 
   You may configure various settings for ECSx in the application environment
-  (usually defined in `config/config.exs):
+  (usually defined in `config/config.exs`):
 
       config :ecsx,
         manager: MyApp.Manager,
@@ -118,6 +118,15 @@ defmodule ECSx do
     Application.get_env(:ecsx, :tick_rate, 20)
   end
 
+  @doc """
+  Returns the frequency of component persistence.
+
+  This defaults to 15 seconds, and can be changed in your app configuration:
+
+  ```elixir
+  config :ecsx, persist_interval: :timer.minutes(1)
+  ```
+  """
   @spec persist_interval() :: integer()
   def persist_interval do
     Application.get_env(:ecsx, :persist_interval, :timer.seconds(15))
