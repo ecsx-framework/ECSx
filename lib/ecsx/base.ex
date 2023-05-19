@@ -10,14 +10,25 @@ defmodule ECSx.Base do
       Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
     end
 
+    :ets.insert(component_type, {id, value, persist})
+    :ok
+  end
+
+  def add_new(component_type, id, value, opts) do
+    persist = Keyword.get(opts, :persist, false)
+
     case :ets.lookup(component_type, id) do
       [] ->
+        if Keyword.get(opts, :log_edits) do
+          Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
+        end
+
         :ets.insert(component_type, {id, value, persist})
         :ok
 
       _ ->
         raise ECSx.AlreadyExistsError,
-          message: "add expects a value to not exist yet",
+          message: "`add` expects component to not exist yet",
           entity_id: id
     end
   end
@@ -35,10 +46,11 @@ defmodule ECSx.Base do
     case :ets.lookup(component_type, id) do
       [{id, _old_value, persist}] ->
         :ets.insert(component_type, {id, value, persist})
+        :ok
 
       [] ->
         raise ECSx.NoResultsError,
-          message: "update expects an existing value",
+          message: "`update` expects an existing value",
           entity_id: id
     end
   end
@@ -49,7 +61,7 @@ defmodule ECSx.Base do
         case default do
           :raise ->
             raise ECSx.NoResultsError,
-              message: "get_one expects one result, got 0",
+              message: "`get_one` expects one result, got 0",
               entity_id: entity_id
 
           other ->
@@ -61,7 +73,7 @@ defmodule ECSx.Base do
 
       multiple_results ->
         raise ECSx.MultipleResultsError,
-          message: "get_one expects one result, got #{length(multiple_results)}",
+          message: "`get_one` expects one result, got #{length(multiple_results)}",
           entity_id: entity_id
     end
   end
@@ -106,10 +118,6 @@ defmodule ECSx.Base do
   end
 
   def remove_one(component_type, entity_id, value, opts) do
-    if Keyword.get(opts, :log_edits) do
-      Logger.debug("#{component_type} remove_one #{inspect(entity_id)}: #{inspect(value)}")
-    end
-
     case :ets.match_object(component_type, {entity_id, value, :_}) do
       [] ->
         raise ECSx.NoResultsError,
@@ -117,6 +125,10 @@ defmodule ECSx.Base do
           entity_id: entity_id
 
       [entity | _rest] ->
+        if Keyword.get(opts, :log_edits) do
+          Logger.debug("#{component_type} remove_one #{inspect(entity_id)}: #{inspect(value)}")
+        end
+
         :ets.delete_object(component_type, entity)
     end
 

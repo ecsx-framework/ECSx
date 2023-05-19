@@ -20,7 +20,8 @@ defmodule ECSx.Component do
 
     * `:value` - The type of value which will be stored in this component type.  Valid types are: `:atom, :binary, :datetime, :float, :integer`
     * `:unique` - When `true`, each entity may have, at most, one component of this type;  attempting to add another will overwrite the first.  When `false`, an entity may have many components of this type.
-    * `:read_concurrency` - when `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
+    * `:log_edits` - When `true`, log messages will be emitted for each component added, updated, or removed.  Defaults to `false`
+    * `:read_concurrency` - When `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
 
   """
 
@@ -76,10 +77,18 @@ defmodule ECSx.Component do
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
 
-      def add(entity_id, value, opts \\ []) when ecsx_type_guard(value),
-        do: ECSx.Base.add(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
-
       def load(component), do: ECSx.Base.load(@table_name, component)
+
+      case @table_type do
+        :set ->
+          def add(entity_id, value, opts \\ []) when ecsx_type_guard(value) do
+            ECSx.Base.add_new(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
+          end
+
+        :bag ->
+          def add(entity_id, value, opts \\ []) when ecsx_type_guard(value),
+            do: ECSx.Base.add(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
+      end
 
       def update(entity_id, value) when ecsx_type_guard(value),
         do: ECSx.Base.update(@table_name, entity_id, value, @component_opts)
@@ -106,26 +115,56 @@ defmodule ECSx.Component do
   @doc """
   Creates a new component.
 
+  ## Options
+
+    * `:persist` - When `true`, this component will persist across app reboots.  Defaults to `false`
+
   ## Example
 
       # Add an ArmorRating component to entity `123` with value `10`
+      # If the app shuts down, this component will be removed
       ArmorRating.add(123, 10)
 
+      # This ArmorRating component will be persisted after app shutdown,
+      # and automatically re-added to entity `123` upon next startup
+      ArmorRating.add(123, 10, persist: true)
+
   """
-  @callback add(entity :: id, value :: value) :: :ok
+  @callback add(entity :: id, value :: value, opts :: Keyword.t()) :: :ok
 
   @doc """
-  Look up a single component.
+  Updates an existing component's value.
 
-  Raises if more than one component is returned.
+  The component's `:persist` option will remain unchanged. (see `add/3`)
 
   ## Example
 
-      # Get the Velocity for entity `123`
-      Velocity.get_one(123)
+      ArmorRating.add(123, 10)
+      # Increase the ArmorRating value from `10` to `15`
+      ArmorRating.update(123, 15)
 
   """
-  @callback get_one(entity :: id) :: value | nil
+  @callback update(entity :: id, value :: value) :: :ok
+
+  @doc """
+  Look up a single component and return its value.
+
+  Raises an `ECSx.MultipleResultsError` if more than one result is found.
+
+  If a `default` value is provided, that value will be returned if no results are found.
+
+  If `default` is not provided, this function will raise an `ECSx.NoResultsError` if no results are found.
+
+  ## Example
+
+      # Get the Velocity for entity `123`, which is known to already exist
+      Velocity.get_one(123)
+
+      # Get the Velocity for entity `123` if it exists, otherwise return `nil`
+      Velocity.get_one(123, nil)
+
+  """
+  @callback get_one(entity :: id, default :: value) :: value
 
   @doc """
   Look up all components of this type.

@@ -1,6 +1,8 @@
 defmodule ECSx.ManagerTest do
   use ExUnit.Case
 
+  import ExUnit.CaptureLog
+
   defmodule AppToSetup do
     use ECSx.Manager
 
@@ -20,9 +22,13 @@ defmodule ECSx.ManagerTest do
 
   describe "setup/1" do
     test "handle_continue/2 runs startup code block" do
-      assert AppToSetup.handle_continue(:start_systems, "state") ==
-               {:noreply, "state"}
+      {result, log} =
+        with_log(fn ->
+          AppToSetup.handle_continue(:start_systems, "state")
+        end)
 
+      assert result == {:noreply, "state"}
+      assert log =~ "[info] Retrieved Components"
       assert_receive :startup
     end
   end

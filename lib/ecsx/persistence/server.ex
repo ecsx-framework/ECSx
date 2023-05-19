@@ -1,4 +1,5 @@
 defmodule ECSx.Persistence.Server do
+  @moduledoc false
   use GenServer
 
   def start_link(_) do
