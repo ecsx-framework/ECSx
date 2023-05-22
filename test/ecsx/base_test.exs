@@ -117,6 +117,48 @@ defmodule ECSx.BaseTest do
     end
   end
 
+  describe "#between/3" do
+    setup :setup_component
+
+    test "integers" do
+      :ets.insert(:sample_component, {123, 1})
+      :ets.insert(:sample_component, {234, 2})
+      :ets.insert(:sample_component, {345, 3})
+
+      assert :sample_component
+             |> Base.between(2, 3)
+             |> Enum.sort() == [{234, 2}, {345, 3}]
+    end
+  end
+
+  describe "#at_least/2" do
+    setup :setup_component
+
+    test "integers" do
+      :ets.insert(:sample_component, {123, 1})
+      :ets.insert(:sample_component, {234, 2})
+      :ets.insert(:sample_component, {345, 3})
+
+      assert :sample_component
+             |> Base.at_least(2)
+             |> Enum.sort() == [{234, 2}, {345, 3}]
+    end
+  end
+
+  describe "#at_most/2" do
+    setup :setup_component
+
+    test "integers" do
+      :ets.insert(:sample_component, {123, 1})
+      :ets.insert(:sample_component, {234, 2})
+      :ets.insert(:sample_component, {345, 3})
+
+      assert :sample_component
+             |> Base.at_most(2)
+             |> Enum.sort() == [{123, 1}, {234, 2}]
+    end
+  end
+
   describe "#remove/2" do
     setup [:setup_component, :setup_nonunique_component]
 

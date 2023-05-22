@@ -108,6 +108,20 @@ defmodule ECSx.Base do
     |> List.flatten()
   end
 
+  def between(component_type, min, max) do
+    :ets.select(component_type, [
+      {{:"$1", :"$2"}, [{:>=, :"$2", min}, {:"=<", :"$2", max}], [{{:"$1", :"$2"}}]}
+    ])
+  end
+
+  def at_least(component_type, min) do
+    :ets.select(component_type, [{{:"$1", :"$2"}, [{:>=, :"$2", min}], [{{:"$1", :"$2"}}]}])
+  end
+
+  def at_most(component_type, max) do
+    :ets.select(component_type, [{{:"$1", :"$2"}, [{:"=<", :"$2", max}], [{{:"$1", :"$2"}}]}])
+  end
+
   def remove(component_type, entity_id, opts) do
     if Keyword.get(opts, :log_edits) do
       Logger.debug("#{component_type} remove #{inspect(entity_id)}")
