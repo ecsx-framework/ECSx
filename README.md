@@ -13,7 +13,7 @@ ECSx is an Entity-Component-System (ECS) framework for Elixir.  ECS is an archit
 ```elixir
 def deps do
   [
-    {:ecsx, "~> 0.3"}
+    {:ecsx, "~> 0.4"}
   ]
 end
 ```

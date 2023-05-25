@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.4 (2023-05-25)
 
 Adding ECSx.ClientEvents to your supervision tree is no longer required  
 Adding the manager to your supervision tree is no longer required  

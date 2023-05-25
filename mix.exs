@@ -2,7 +2,7 @@ defmodule ECSx.MixProject do
   use Mix.Project
 
   @gh_url "https://github.com/APB9785/ECSx"
-  @version "0.3.1"
+  @version "0.4"
 
   def project do
     [
@@ -86,8 +86,9 @@ defmodule ECSx.MixProject do
 
   defp extras do
     [
-      "guides/ecs_design.md",
       "guides/installation.md",
+      "guides/upgrade_guide.md",
+      "guides/ecs_design.md",
       "guides/tutorial/initial_setup.md",
       "guides/tutorial/backend_basics.md",
       "guides/tutorial/web_frontend_liveview.md"
