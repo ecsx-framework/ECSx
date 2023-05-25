@@ -1,6 +1,7 @@
 defmodule ECSx.ComponentTest do
   use ExUnit.Case
 
+  alias ECSx.IntegerComponent
   alias ECSx.StringComponent
 
   describe "__using__" do
@@ -42,6 +43,90 @@ defmodule ECSx.ComponentTest do
       assert_raise ArgumentError, fn ->
         BadReadConcurrency.init()
       end
+    end
+  end
+
+  describe "#between/2" do
+    test "raises error for binary component type" do
+      StringComponent.init()
+
+      assert_raise ECSx.ValueComparisonError,
+                   """
+                   `between/2` is only valid for components with integer or float values
+                   ECSx.StringComponent is configured as `value: :binary`
+                   """,
+                   fn ->
+                     StringComponent.between(1, 2)
+                   end
+    end
+
+    test "OK for integer component type" do
+      IntegerComponent.init()
+
+      assert IntegerComponent.between(1, 2) == []
+    end
+
+    test "arguments must be numerical" do
+      IntegerComponent.init()
+
+      assert_raise FunctionClauseError, fn -> IntegerComponent.between(0, "five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.between(:zero, 5) end
+    end
+  end
+
+  describe "#at_least/1" do
+    test "raises error for binary component type" do
+      StringComponent.init()
+
+      assert_raise ECSx.ValueComparisonError,
+                   """
+                   `at_least/1` is only valid for components with integer or float values
+                   ECSx.StringComponent is configured as `value: :binary`
+                   """,
+                   fn ->
+                     StringComponent.at_least(1)
+                   end
+    end
+
+    test "OK for integer component type" do
+      IntegerComponent.init()
+
+      assert IntegerComponent.at_least(1) == []
+    end
+
+    test "argument must be numerical" do
+      IntegerComponent.init()
+
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_least("five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_least(:five) end
+    end
+  end
+
+  describe "#at_most/1" do
+    test "raises error for binary component type" do
+      StringComponent.init()
+
+      assert_raise ECSx.ValueComparisonError,
+                   """
+                   `at_most/1` is only valid for components with integer or float values
+                   ECSx.StringComponent is configured as `value: :binary`
+                   """,
+                   fn ->
+                     StringComponent.at_most(2)
+                   end
+    end
+
+    test "OK for integer component type" do
+      IntegerComponent.init()
+
+      assert IntegerComponent.at_most(2) == []
+    end
+
+    test "argument must be numerical" do
+      IntegerComponent.init()
+
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_most("five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_most(:five) end
     end
   end
 end

@@ -121,9 +121,9 @@ defmodule ECSx.BaseTest do
     setup :setup_component
 
     test "integers" do
-      :ets.insert(:sample_component, {123, 1})
-      :ets.insert(:sample_component, {234, 2})
-      :ets.insert(:sample_component, {345, 3})
+      :ets.insert(:sample_component, {123, 1, false})
+      :ets.insert(:sample_component, {234, 2, false})
+      :ets.insert(:sample_component, {345, 3, true})
 
       assert :sample_component
              |> Base.between(2, 3)
@@ -135,9 +135,9 @@ defmodule ECSx.BaseTest do
     setup :setup_component
 
     test "integers" do
-      :ets.insert(:sample_component, {123, 1})
-      :ets.insert(:sample_component, {234, 2})
-      :ets.insert(:sample_component, {345, 3})
+      :ets.insert(:sample_component, {123, 1, true})
+      :ets.insert(:sample_component, {234, 2, true})
+      :ets.insert(:sample_component, {345, 3, false})
 
       assert :sample_component
              |> Base.at_least(2)
@@ -149,9 +149,9 @@ defmodule ECSx.BaseTest do
     setup :setup_component
 
     test "integers" do
-      :ets.insert(:sample_component, {123, 1})
-      :ets.insert(:sample_component, {234, 2})
-      :ets.insert(:sample_component, {345, 3})
+      :ets.insert(:sample_component, {123, 1, true})
+      :ets.insert(:sample_component, {234, 2, true})
+      :ets.insert(:sample_component, {345, 3, true})
 
       assert :sample_component
              |> Base.at_most(2)
