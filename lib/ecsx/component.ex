@@ -127,14 +127,14 @@ defmodule ECSx.Component do
               component_type: @table_name
           end
 
-          def at_least(min) do
+          def at_least(_min) do
             raise ECSx.ValueComparisonError,
               fn_name: "at_least/1",
               value_type: unquote(value),
               component_type: @table_name
           end
 
-          def at_most(max) do
+          def at_most(_max) do
             raise ECSx.ValueComparisonError,
               fn_name: "at_most/1",
               value_type: unquote(value),
