@@ -56,8 +56,6 @@ defmodule ECSx.ComponentTest do
     end
 
     test "arguments must be numerical" do
-      IntegerComponent.init()
-
       assert_raise FunctionClauseError, fn -> IntegerComponent.between(0, "five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.between(:zero, 5) end
     end
@@ -73,8 +71,6 @@ defmodule ECSx.ComponentTest do
     end
 
     test "argument must be numerical" do
-      IntegerComponent.init()
-
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_least("five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_least(:five) end
     end
@@ -90,8 +86,6 @@ defmodule ECSx.ComponentTest do
     end
 
     test "argument must be numerical" do
-      IntegerComponent.init()
-
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_most("five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_most(:five) end
     end
