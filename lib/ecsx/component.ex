@@ -110,36 +110,13 @@ defmodule ECSx.Component do
 
       def exists?(entity_id), do: ECSx.Base.exists?(@table_name, entity_id)
 
-      case Keyword.fetch!(opts, :value) do
-        value when value in [:integer, :float] ->
-          def between(min, max) when is_number(min) and is_number(max),
-            do: ECSx.Base.between(@table_name, min, max)
+      if Keyword.fetch!(opts, :value) in [:integer, :float] do
+        def between(min, max) when is_number(min) and is_number(max),
+          do: ECSx.Base.between(@table_name, min, max)
 
-          def at_least(min) when is_number(min), do: ECSx.Base.at_least(@table_name, min)
+        def at_least(min) when is_number(min), do: ECSx.Base.at_least(@table_name, min)
 
-          def at_most(max) when is_number(max), do: ECSx.Base.at_most(@table_name, max)
-
-        value ->
-          def between(_min, _max) do
-            raise ECSx.ValueComparisonError,
-              fn_name: "between/2",
-              value_type: unquote(value),
-              component_type: @table_name
-          end
-
-          def at_least(_min) do
-            raise ECSx.ValueComparisonError,
-              fn_name: "at_least/1",
-              value_type: unquote(value),
-              component_type: @table_name
-          end
-
-          def at_most(_max) do
-            raise ECSx.ValueComparisonError,
-              fn_name: "at_most/1",
-              value_type: unquote(value),
-              component_type: @table_name
-          end
+        def at_most(max) when is_number(max), do: ECSx.Base.at_most(@table_name, max)
       end
     end
   end
@@ -239,7 +216,7 @@ defmodule ECSx.Component do
   than or equal to `max`.
 
   This function only works for numerical component types (`:value` set to either
-  `:integer` or `:float`). Other value types will raise `ECSx.ValueComparisonError`.
+  `:integer` or `:float`). Other value types will raise `UndefinedFunctionError`.
 
   ## Example
 
@@ -253,7 +230,7 @@ defmodule ECSx.Component do
   Look up all components where the value is greater than or equal to `min`.
 
   This function only works for numerical component types (`:value` set to either
-  `:integer` or `:float`). Other value types will raise `ECSx.ValueComparisonError`.
+  `:integer` or `:float`). Other value types will raise `UndefinedFunctionError`.
 
   ## Example
 
@@ -267,7 +244,7 @@ defmodule ECSx.Component do
   Look up all components where the value is less than or equal to `max`.
 
   This function only works for numerical component types (`:value` set to either
-  `:integer` or `:float`). Other value types will raise `ECSx.ValueComparisonError`.
+  `:integer` or `:float`). Other value types will raise `UndefinedFunctionError`.
 
   ## Example
 
@@ -300,4 +277,6 @@ defmodule ECSx.Component do
   Checks if an entity has one or more components of this type.
   """
   @callback exists?(entity :: id) :: boolean
+
+  @optional_callbacks between: 2, at_least: 1, at_most: 1
 end

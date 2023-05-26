@@ -47,23 +47,12 @@ defmodule ECSx.ComponentTest do
   end
 
   describe "#between/2" do
-    test "raises error for binary component type" do
-      StringComponent.init()
-
-      assert_raise ECSx.ValueComparisonError,
-                   """
-                   `between/2` is only valid for components with integer or float values
-                   ECSx.StringComponent is configured as `value: :binary`
-                   """,
-                   fn ->
-                     StringComponent.between(1, 2)
-                   end
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :between, 2)
     end
 
-    test "OK for integer component type" do
-      IntegerComponent.init()
-
-      assert IntegerComponent.between(1, 2) == []
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :between, 2)
     end
 
     test "arguments must be numerical" do
@@ -75,23 +64,12 @@ defmodule ECSx.ComponentTest do
   end
 
   describe "#at_least/1" do
-    test "raises error for binary component type" do
-      StringComponent.init()
-
-      assert_raise ECSx.ValueComparisonError,
-                   """
-                   `at_least/1` is only valid for components with integer or float values
-                   ECSx.StringComponent is configured as `value: :binary`
-                   """,
-                   fn ->
-                     StringComponent.at_least(1)
-                   end
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :at_least, 1)
     end
 
-    test "OK for integer component type" do
-      IntegerComponent.init()
-
-      assert IntegerComponent.at_least(1) == []
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :at_least, 1)
     end
 
     test "argument must be numerical" do
@@ -103,23 +81,12 @@ defmodule ECSx.ComponentTest do
   end
 
   describe "#at_most/1" do
-    test "raises error for binary component type" do
-      StringComponent.init()
-
-      assert_raise ECSx.ValueComparisonError,
-                   """
-                   `at_most/1` is only valid for components with integer or float values
-                   ECSx.StringComponent is configured as `value: :binary`
-                   """,
-                   fn ->
-                     StringComponent.at_most(2)
-                   end
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :at_most, 1)
     end
 
-    test "OK for integer component type" do
-      IntegerComponent.init()
-
-      assert IntegerComponent.at_most(2) == []
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :at_most, 1)
     end
 
     test "argument must be numerical" do
