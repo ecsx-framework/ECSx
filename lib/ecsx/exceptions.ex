@@ -42,20 +42,3 @@ defmodule ECSx.AlreadyExistsError do
     %__MODULE__{message: message}
   end
 end
-
-defmodule ECSx.ValueComparisonError do
-  defexception [:message]
-
-  def exception(opts) do
-    fn_name = Keyword.fetch!(opts, :fn_name)
-    component_type = Keyword.fetch!(opts, :component_type)
-    value_type = Keyword.fetch!(opts, :value_type)
-
-    message = """
-    `#{fn_name}` is only valid for components with integer or float values
-    #{inspect(component_type)} is configured as `value: #{inspect(value_type)}`
-    """
-
-    %__MODULE__{message: message}
-  end
-end
