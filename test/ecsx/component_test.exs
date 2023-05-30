@@ -1,6 +1,7 @@
 defmodule ECSx.ComponentTest do
   use ExUnit.Case
 
+  alias ECSx.IntegerComponent
   alias ECSx.StringComponent
 
   describe "__using__" do
@@ -42,6 +43,51 @@ defmodule ECSx.ComponentTest do
       assert_raise ArgumentError, fn ->
         BadReadConcurrency.init()
       end
+    end
+  end
+
+  describe "#between/2" do
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :between, 2)
+    end
+
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :between, 2)
+    end
+
+    test "arguments must be numerical" do
+      assert_raise FunctionClauseError, fn -> IntegerComponent.between(0, "five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.between(:zero, 5) end
+    end
+  end
+
+  describe "#at_least/1" do
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :at_least, 1)
+    end
+
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :at_least, 1)
+    end
+
+    test "argument must be numerical" do
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_least("five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_least(:five) end
+    end
+  end
+
+  describe "#at_most/1" do
+    test "exists for integer component type" do
+      assert function_exported?(IntegerComponent, :at_most, 1)
+    end
+
+    test "does not exist for non-numerical component types" do
+      refute function_exported?(StringComponent, :at_most, 1)
+    end
+
+    test "argument must be numerical" do
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_most("five") end
+      assert_raise FunctionClauseError, fn -> IntegerComponent.at_most(:five) end
     end
   end
 end
