@@ -63,7 +63,7 @@ defmodule ECSx.MixProject do
 
   defp package do
     [
-      maintainers: ["Andrew P Berrien"],
+      maintainers: ["Andrew P Berrien", "Mike Binns"],
       licenses: ["GPL-3.0"],
       links: %{
         "Changelog" => "#{@gh_url}/blob/master/CHANGELOG.md",

@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4 (2023-05-25)
+## v0.4 (2023-05-30)
 
   * Adding ECSx.ClientEvents to your supervision tree is no longer required  
   * Adding the manager to your supervision tree is no longer required  
@@ -19,6 +19,7 @@
   * Added `Component` callback `update/2` for updating an existing component's value, while maintaining the previously set `:persist` option  
   * Manager `setup` macro is now an optional callback `setup/0` which only runs once, at the server's first startup  
   * Added a new Manager callback `startup/0` which runs every time the server starts  
+  * Added `Component` callbacks `between/2`, `at_least/1`, and `at_most/1` (only available for integer and float component types)
 
 ## v0.3.1 (2023-01-12)
 
