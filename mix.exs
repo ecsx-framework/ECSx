@@ -2,7 +2,7 @@ defmodule ECSx.MixProject do
   use Mix.Project
 
   @gh_url "https://github.com/APB9785/ECSx"
-  @version "0.3.1"
+  @version "0.4.0"
 
   def project do
     [
@@ -63,7 +63,7 @@ defmodule ECSx.MixProject do
 
   defp package do
     [
-      maintainers: ["Andrew P Berrien"],
+      maintainers: ["Andrew P Berrien", "Mike Binns"],
       licenses: ["GPL-3.0"],
       links: %{
         "Changelog" => "#{@gh_url}/blob/master/CHANGELOG.md",
@@ -86,8 +86,10 @@ defmodule ECSx.MixProject do
 
   defp extras do
     [
-      "guides/ecs_design.md",
       "guides/installation.md",
+      "CHANGELOG.md",
+      "guides/upgrade_guide.md",
+      "guides/ecs_design.md",
       "guides/tutorial/initial_setup.md",
       "guides/tutorial/backend_basics.md",
       "guides/tutorial/web_frontend_liveview.md"
