@@ -1,4 +1,6 @@
 defmodule ECSx.Persistence do
+  @moduledoc false
+
   def persist_components(opts \\ []) do
     ECSx.manager().components()
     |> Enum.map(fn component_module ->
