@@ -326,30 +326,30 @@ defmodule Ship.Systems.Destruction do
     end)
   end
 
-  defp destroy(entity) do
-    ArmorRating.remove(entity)
-    AttackCooldown.remove(entity)
-    AttackDamage.remove(entity)
-    AttackRange.remove(entity)
-    AttackSpeed.remove(entity)
-    AttackTarget.remove(entity)
-    HullPoints.remove(entity)
-    SeekingTarget.remove(entity)
-    XPosition.remove(entity)
-    XVelocity.remove(entity)
-    YPosition.remove(entity)
-    YVelocity.remove(entity)
+  defp destroy(ship) do
+    ArmorRating.remove(ship)
+    AttackCooldown.remove(ship)
+    AttackDamage.remove(ship)
+    AttackRange.remove(ship)
+    AttackSpeed.remove(ship)
+    AttackTarget.remove(ship)
+    HullPoints.remove(ship)
+    SeekingTarget.remove(ship)
+    XPosition.remove(ship)
+    XVelocity.remove(ship)
+    YPosition.remove(ship)
+    YVelocity.remove(ship)
 
     # when a ship is destroyed, other ships should stop targeting it
-    untarget(entity)
+    untarget(ship)
 
-    DestroyedAt.add(entity, DateTime.utc_now())
+    DestroyedAt.add(ship, DateTime.utc_now())
   end
 
   defp untarget(target) do
-    for entity <- AttackTarget.search(target) do
-      AttackTarget.remove(entity)
-      SeekingTarget.add(entity)
+    for ship <- AttackTarget.search(target) do
+      AttackTarget.remove(ship)
+      SeekingTarget.add(ship)
     end
   end
 end

@@ -350,7 +350,7 @@ defmodule ShipWeb.GameLive do
               y={y}
               width="1"
               height="1"
-              href={~p"/images/#{image_file}}
+              href={~p"/images/#{image_file}"}
             />
           <% end %>
           <text x={@x_offset} y={@y_offset + 1} style="font: 1px serif">
@@ -535,7 +535,7 @@ defmodule Ship.Systems.ClientEventHandler do
 end
 ```
 
-Lastly, we'll need the [player_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/player_ship.svg) and [npc_ship.svg](https://github.com/APB9785/ship/blob/master/priv/static/images/npc_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `~p"/images/..."` calls in the LiveView template.
+Lastly, we'll need the [player_ship.svg](https://raw.githubusercontent.com/APB9785/ship/master/priv/static/images/player_ship.svg) and [npc_ship.svg](https://raw.githubusercontent.com/APB9785/ship/master/priv/static/images/npc_ship.svg) files.  Right-click on the links and save them to `priv/static/images/`, where they will be found by our `~p"/images/..."` calls in the LiveView template.
 
 Now running
 
