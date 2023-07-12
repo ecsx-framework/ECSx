@@ -16,6 +16,14 @@ defmodule ECSx.BaseTest do
                {123, "test2", false}
              ]
     end
+
+    test "with reverse index" do
+      assert :ok == Base.add(:nonunique_component, 123, "test", reverse_index: true)
+
+      index_table = Module.concat(:nonunique_component, "Index")
+
+      assert :ets.tab2list(index_table) == [{"test", 123, false}]
+    end
   end
 
   describe "#add_new/4" do
@@ -36,6 +44,14 @@ defmodule ECSx.BaseTest do
                      Base.add_new(:sample_component, 123, "test", [])
                    end
     end
+
+    test "with reverse index" do
+      assert :ok == Base.add_new(:sample_component, 123, "test", reverse_index: true)
+
+      index_table = Module.concat(:sample_component, "Index")
+
+      assert :ets.tab2list(index_table) == [{"test", 123, false}]
+    end
   end
 
   describe "#update/4" do
@@ -53,6 +69,15 @@ defmodule ECSx.BaseTest do
                    fn ->
                      Base.update(:sample_component, 123, "test2", [])
                    end
+    end
+
+    test "with reverse index" do
+      :ets.insert(:sample_component, {123, "test", false})
+      index_table = Module.concat(:sample_component, "Index")
+      :ets.insert(index_table, {"test", 123, false})
+
+      assert :ok == Base.update(:sample_component, 123, "test2", reverse_index: true)
+      assert :ets.tab2list(index_table) == [{"test2", 123, false}]
     end
   end
 
@@ -217,12 +242,18 @@ defmodule ECSx.BaseTest do
   end
 
   defp setup_component(_) do
-    :ets.new(:sample_component, [:named_table])
+    table_name = :sample_component
+    :ets.new(table_name, [:named_table])
+    index_table = Module.concat(table_name, "Index")
+    :ets.new(index_table, [:named_table, :bag])
     :ok
   end
 
   defp setup_nonunique_component(_) do
-    :ets.new(:nonunique_component, [:named_table, :bag])
+    table_name = :nonunique_component
+    :ets.new(table_name, [:named_table, :bag])
+    index_table = Module.concat(table_name, "Index")
+    :ets.new(index_table, [:named_table, :bag])
     :ok
   end
 end
