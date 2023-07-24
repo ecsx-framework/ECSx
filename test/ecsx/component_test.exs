@@ -12,6 +12,10 @@ defmodule ECSx.ComponentTest do
 
       assert "Andy" == StringComponent.get_one(11)
 
+      StringComponent.update(11, fn (str) -> str <> " Alice" end)
+
+      assert "Andy Alice" == StringComponent.get_one(11)
+
       for {id, foo} <- [{1, "A"}, {2, "B"}, {3, "C"}],
           do: StringComponent.add(id, foo)
 
@@ -28,7 +32,7 @@ defmodule ECSx.ComponentTest do
       assert Enum.sort(all_components) == [
                {1, "A"},
                {2, "B"},
-               {11, "Andy"}
+               {11, "Andy Alice"}
              ]
     end
 
