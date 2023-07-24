@@ -16,7 +16,7 @@ defmodule ECSx.ComponentTest do
 
       assert "Alice" == StringComponent.get_one(11)
 
-      StringComponent.update(11, fn (str) -> str <> " Bob" end)
+      assert "Alice" == StringComponent.update(11, fn (str) -> str <> " Bob" end)
 
       assert "Alice Bob" == StringComponent.get_one(11)
 

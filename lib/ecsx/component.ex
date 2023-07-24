@@ -96,6 +96,7 @@ defmodule ECSx.Component do
       def update(entity_id, fun) when is_function(fun, 1) do
         value = get_one(entity_id)
         ECSx.Base.update(@table_name, entity_id, fun.(value), @component_opts)
+        value
       end
 
       def get_one(key, default \\ :raise), do: ECSx.Base.get_one(@table_name, key, default)
