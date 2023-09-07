@@ -105,11 +105,34 @@ defmodule ECSx.Manager do
             Logger.info("`startup/0` complete")
         end
 
-        tick_interval = div(1000, ECSx.tick_rate())
-        :timer.send_interval(tick_interval, :tick)
-        :timer.send_interval(ECSx.persist_interval(), :persist)
+        {:ok, _tref} = init_ticks(ECSx.tick_rate())
 
         {:noreply, state}
+      end
+
+      defp init_ticks(tick_rate) when is_number(tick_rate) do
+        tick_interval = div(1000, tick_rate)
+        :timer.send_interval(tick_interval, :tick)
+        :timer.send_interval(ECSx.persist_interval(), :persist)
+      end
+
+      defp init_ticks(tick_rate) when is_atom(tick_rate) do
+        case tick_rate do
+          :manual -> {:ok, make_ref()}
+          _ -> init_ticks(20)
+        end
+      end
+
+      def tick() do
+        tick_rate = ECSx.tick_rate()
+
+        case tick_rate do
+          :manual ->
+            send(self(), :tick)
+
+          _ ->
+            {:error, :requires_manual_click_rate}
+        end
       end
 
       def handle_info(:tick, state) do
