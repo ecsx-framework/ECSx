@@ -3,6 +3,5 @@ defmodule <%= app_name %>.Components.<%= component_type %> do
   Documentation for <%= component_type %> components.
   """
   use ECSx.Component,
-    value: <%= inspect(value) %>,
-    unique: <%= unique %>
+    value: <%= inspect(value) %>
 end

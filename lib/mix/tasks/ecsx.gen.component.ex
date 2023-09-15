@@ -16,10 +16,6 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     * float
     * integer
 
-  By default, new component types are generated with `unique: true`, which allows an entity to have at most one component of this type at any given time.  To override this, use the `--no-unique` flag:
-
-      $ mix ecsx.gen.component Friendship binary --no-unique
-
   """
 
   use Mix.Task
@@ -41,11 +37,10 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     |> Mix.raise()
   end
 
-  def run([component_type_name, value_type | opts]) do
+  def run([component_type_name, value_type]) do
     value_type = validate(value_type)
-    {opts, _, _} = OptionParser.parse(opts, strict: [unique: :boolean])
     Helpers.inject_component_module_into_manager(component_type_name)
-    create_component_file(component_type_name, value_type, opts)
+    create_component_file(component_type_name, value_type)
   end
 
   defp message_with_help(message) do
@@ -66,14 +61,13 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
   defp validate(_),
     do: Mix.raise("Invalid value type. Possible types are: #{inspect(@valid_value_types)}")
 
-  defp create_component_file(component_type_name, value_type, opts) do
+  defp create_component_file(component_type_name, value_type) do
     filename = Macro.underscore(component_type_name)
     target = "lib/#{Helpers.otp_app()}/components/#{filename}.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
 
     binding = [
       app_name: Helpers.root_module(),
-      unique: Keyword.get(opts, :unique, true),
       component_type: component_type_name,
       value: value_type
     ]

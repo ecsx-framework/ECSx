@@ -12,14 +12,12 @@ defmodule ECSx.Component do
 
       defmodule MyApp.Components.Color do
         use ECSx.Component,
-          value: :binary,
-          unique: true
+          value: :binary
       end
 
   ### Options
 
     * `:value` - The type of value which will be stored in this component type.  Valid types are: `:atom, :binary, :datetime, :float, :integer`
-    * `:unique` - When `true`, each entity may have, at most, one component of this type;  attempting to add another will overwrite the first.  When `false`, an entity may have many components of this type.
     * `:log_edits` - When `true`, log messages will be emitted for each component added, updated, or removed.  Defaults to `false`
     * `:read_concurrency` - When `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
 
@@ -36,20 +34,6 @@ defmodule ECSx.Component do
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
       @valid_value_types ~w(atom binary datetime float integer)a
       @component_opts [log_edits: opts[:log_edits] || false]
-
-      @table_type (case(Keyword.get(opts, :unique, true)) do
-                     true ->
-                       :set
-
-                     false ->
-                       :bag
-
-                     x ->
-                       raise(
-                         ArgumentError,
-                         "Invalid option for `unique` - expected boolean, got: #{inspect(x)}"
-                       )
-                   end)
 
       # Sets up value type validation
       case Keyword.fetch!(opts, :value) do
@@ -75,38 +59,25 @@ defmodule ECSx.Component do
           )
       end
 
-      def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
+      def init, do: ECSx.Base.init(@table_name, @concurrency)
 
       def load(component), do: ECSx.Base.load(@table_name, component)
 
-      case @table_type do
-        :set ->
-          def add(entity_id, value, opts \\ []) when ecsx_type_guard(value) do
-            ECSx.Base.add_new(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
-          end
-
-        :bag ->
-          def add(entity_id, value, opts \\ []) when ecsx_type_guard(value),
-            do: ECSx.Base.add(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
-      end
+      def add(entity_id, value, opts \\ []) when ecsx_type_guard(value),
+        do: ECSx.Base.add(@table_name, entity_id, value, Keyword.merge(opts, @component_opts))
 
       def update(entity_id, value) when ecsx_type_guard(value),
         do: ECSx.Base.update(@table_name, entity_id, value, @component_opts)
 
-      def get_one(key, default \\ :raise), do: ECSx.Base.get_one(@table_name, key, default)
+      def get(key, default \\ :raise), do: ECSx.Base.get(@table_name, key, default)
 
       def get_all, do: ECSx.Base.get_all(@table_name)
-
-      def get_all(key), do: ECSx.Base.get_all(@table_name, key)
 
       def get_all_persist, do: ECSx.Base.get_all_persist(@table_name)
 
       def search(value), do: ECSx.Base.search(@table_name, value)
 
       def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id, @component_opts)
-
-      def remove_one(entity_id, value),
-        do: ECSx.Base.remove_one(@table_name, entity_id, value, @component_opts)
 
       def exists?(entity_id), do: ECSx.Base.exists?(@table_name, entity_id)
 
@@ -156,24 +127,22 @@ defmodule ECSx.Component do
   @callback update(entity :: id, value :: value) :: :ok
 
   @doc """
-  Look up a single component and return its value.
+  Look up a component and return its value.
 
-  Raises an `ECSx.MultipleResultsError` if more than one result is found.
+  If a `default` value is provided, that value will be returned if no result is found.
 
-  If a `default` value is provided, that value will be returned if no results are found.
-
-  If `default` is not provided, this function will raise an `ECSx.NoResultsError` if no results are found.
+  If `default` is not provided, this function will raise an `ECSx.NoResultsError` if no result is found.
 
   ## Example
 
       # Get the Velocity for entity `123`, which is known to already exist
-      Velocity.get_one(123)
+      Velocity.get(123)
 
       # Get the Velocity for entity `123` if it exists, otherwise return `nil`
-      Velocity.get_one(123, nil)
+      Velocity.get(123, nil)
 
   """
-  @callback get_one(entity :: id, default :: value) :: value
+  @callback get(entity :: id, default :: value) :: value
 
   @doc """
   Look up all components of this type.
@@ -185,20 +154,6 @@ defmodule ECSx.Component do
 
   """
   @callback get_all() :: [{id, value}]
-
-  @doc """
-  Look up all components of this type belonging to a given entity.
-
-  This function is only useful for component types configured with `unique: false`.
-  For unique components, `get_one/1` should be used instead.
-
-  ## Example
-
-      # Get all PowerUp components for entity `123`
-      PowerUp.get_all(123)
-
-  """
-  @callback get_all(entity :: id) :: [value]
 
   @doc """
   Look up all IDs for entities which have a component of this type with a given value.
@@ -255,26 +210,12 @@ defmodule ECSx.Component do
   @callback at_most(max :: number) :: [{id, number}]
 
   @doc """
-  Removes any existing components of this type from an entity.
+  Removes this component type from an entity.
   """
   @callback remove(entity :: id) :: :ok
 
   @doc """
-  Removes one component with a specific entity ID and value.
-
-  This function is only useful for component types configured with `unique: false`.
-  For unique components, `remove/1` should be used instead.
-
-  ## Example
-
-      # Remove a specific PowerUp value `9` from entity `123`
-      PowerUp.remove_one(123, 9)
-
-  """
-  @callback remove_one(entity :: id, value :: value) :: :ok
-
-  @doc """
-  Checks if an entity has one or more components of this type.
+  Checks if an entity has a component of this type.
   """
   @callback exists?(entity :: id) :: boolean
 
