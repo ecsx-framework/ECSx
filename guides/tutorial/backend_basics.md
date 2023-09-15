@@ -58,14 +58,14 @@ defmodule Ship.Systems.Driver do
   @impl ECSx.System
   def run do
     for {entity, x_velocity} <- XVelocity.get_all() do
-      x_position = XPosition.get_one(entity)
+      x_position = XPosition.get(entity)
       new_x_position = x_position + x_velocity
       XPosition.update(entity, new_x_position)
     end
 
     # Once the x-values are updated, do the same for the y-values
     for {entity, y_velocity} <- YVelocity.get_all() do
-      y_position = YPosition.get_one(entity)
+      y_position = YPosition.get(entity)
       new_y_position = y_position + y_velocity
       YPosition.update(entity, new_y_position)
     end
@@ -78,7 +78,7 @@ end
 
 Now whenever a ship gains velocity, this system will update the position accordingly over time.  Keep in mind that the velocity is relative to the server's tick rate, which by default is 20.  This means the unit of measurement is "game units per 1/20th of a second".
 
-For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `config/config.ex`.
+For example, if you want the speed to move from XPosition 0 to XPosition 100 in one second, you divide the distance 100 by the tick rate 20, to see that an XVelocity of 5 is appropriate.  The tick rate can be changed in `config/config.ex` and fetched at runtime by calling `ECSx.tick_rate/0`.
 
 ## Targeting & Attacking
 
@@ -119,10 +119,10 @@ defmodule Ship.SystemUtils do
   alias Ship.Components.YPosition
 
   def distance_between(entity_1, entity_2) do
-    x_1 = XPosition.get_one(entity_1)
-    x_2 = XPosition.get_one(entity_2)
-    y_1 = YPosition.get_one(entity_1)
-    y_2 = YPosition.get_one(entity_2)
+    x_1 = XPosition.get(entity_1)
+    x_2 = XPosition.get(entity_2)
+    y_1 = YPosition.get(entity_1)
+    y_2 = YPosition.get(entity_2)
 
     x = abs(x_1 - x_2)
     y = abs(y_1 - y_2)
@@ -168,7 +168,7 @@ defmodule Ship.Systems.Targeting do
     |> Enum.reject(fn {possible_target, _hp} -> possible_target == self end)
     |> Enum.find(fn {possible_target, _hp} ->
       distance_between = SystemUtils.distance_between(possible_target, self)
-      range = AttackRange.get_one(self)
+      range = AttackRange.get(self)
 
       distance_between < range
     end)
@@ -209,7 +209,7 @@ defmodule Ship.Systems.Attacking do
 
   defp attack_if_ready({self, target}) do
     cond do
-      SystemUtils.distance_between(self, target) > AttackRange.get_one(self) ->
+      SystemUtils.distance_between(self, target) > AttackRange.get(self) ->
         # If the target ever leaves our attack range, we want to remove the AttackTarget
         # and begin searching for a new one.
         AttackTarget.remove(self)
@@ -226,12 +226,12 @@ defmodule Ship.Systems.Attacking do
   end
 
   defp deal_damage(self, target) do
-    attack_damage = AttackDamage.get_one(self)
+    attack_damage = AttackDamage.get(self)
     # Assuming one armor rating always equals one damage
-    reduction_from_armor = ArmorRating.get_one(target)
+    reduction_from_armor = ArmorRating.get(target)
     final_damage_amount = attack_damage - reduction_from_armor
 
-    target_current_hp = HullPoints.get_one(target)
+    target_current_hp = HullPoints.get(target)
     target_new_hp = target_current_hp - final_damage_amount
 
     HullPoints.update(target, target_new_hp)
@@ -248,7 +248,7 @@ defmodule Ship.Systems.Attacking do
   # We're going to model AttackSpeed with a float representing attacks per second.
   # The goal here is to convert that into milliseconds per attack.
   defp calculate_cooldown_time(self) do
-    attacks_per_second = AttackSpeed.get_one(self)
+    attacks_per_second = AttackSpeed.get(self)
     seconds_per_attack = 1 / attacks_per_second
 
     ceil(seconds_per_attack * 1000)
@@ -256,7 +256,7 @@ defmodule Ship.Systems.Attacking do
 end
 ```
 
-Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/0` to fetch the list of all relevant entities, then `get_one/1` and `exists?/1` to check specific attributes of the entities, `add/2` for creating new components, and `update/2` for overwriting existing ones.  We're also starting to see the use of `remove/1` for excluding an entity from game logic which is no longer necessary.
+Phew, that was a lot!  But we're still using the same basic concepts:  `get_all/0` to fetch the list of all relevant entities, then `get/1` and `exists?/1` to check specific attributes of the entities, `add/2` for creating new components, and `update/2` for overwriting existing ones.  We're also starting to see the use of `remove/1` for excluding an entity from game logic which is no longer necessary.
 
 ## Cooldowns
 
