@@ -59,6 +59,21 @@ defmodule ECSx.Component do
           )
       end
 
+      # Eventually remove this
+      case Keyword.get(opts, :unique) do
+        true ->
+          IO.warn(
+            "Component option `:unique` no longer has any effect",
+            Macro.Env.stacktrace(env)
+          )
+
+        false ->
+          raise(ArgumentError, "Component option `unique: false` is no longer allowed")
+
+        nil ->
+          :ok
+      end
+
       def init, do: ECSx.Base.init(@table_name, @concurrency)
 
       def load(component), do: ECSx.Base.load(@table_name, component)
