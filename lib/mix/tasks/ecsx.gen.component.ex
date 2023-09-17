@@ -44,8 +44,8 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
   def run([component_type_name, value_type | opts]) do
     value_type = validate(value_type)
     {opts, _, _} = OptionParser.parse(opts, strict: [unique: :boolean])
-    create_component_file(component_type_name, value_type, opts)
     Helpers.inject_component_module_into_manager(component_type_name)
+    create_component_file(component_type_name, value_type, opts)
   end
 
   defp message_with_help(message) do

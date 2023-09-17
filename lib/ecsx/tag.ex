@@ -25,14 +25,20 @@ defmodule ECSx.Tag do
       @table_type :set
       @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
+      @tag_opts [log_edits: opts[:log_edits] || false]
 
       def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
 
-      def add(entity_id), do: ECSx.Base.add(@table_name, {entity_id})
+      def add(entity_id, opts \\ []),
+        do: ECSx.Base.add_new(@table_name, entity_id, nil, Keyword.merge(opts, @tag_opts))
+
+      def load(component), do: ECSx.Base.load(@table_name, component)
 
       def get_all, do: ECSx.Base.get_all_keys(@table_name)
 
-      def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id)
+      def get_all_persist, do: ECSx.Base.get_all_persist(@table_name)
+
+      def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id, @tag_opts)
 
       def exists?(entity_id), do: ECSx.Base.exists?(@table_name, entity_id)
     end

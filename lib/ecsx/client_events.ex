@@ -2,16 +2,6 @@ defmodule ECSx.ClientEvents do
   @moduledoc """
   A store to which clients can write, for communication with the ECSx backend.
 
-  ## Usage
-
-  To use ClientEvents, it must be added to your application's supervision tree:
-
-      children = [
-        ...
-        ECSx.ClientEvents
-        ...
-      ]
-
   Events are created from the client process by calling `add/2`, then retrieved by the handler
   system using `get_and_clear/0`.  You will be required to create the handler system yourself -
   see the [tutorial project](web_frontend_liveview.html#handling-client-events) for a detailed example.
@@ -33,8 +23,16 @@ defmodule ECSx.ClientEvents do
 
   @doc false
   def handle_call(:get_and_clear, _from, state) do
-    {:reply, Enum.reverse(state), []}
+    {reversed, count} = reverse_and_count(state)
+
+    :telemetry.execute([:ecsx, :client_events], %{count: count})
+
+    {:reply, reversed, []}
   end
+
+  defp reverse_and_count(list, done \\ [], count \\ 0)
+  defp reverse_and_count([], done, count), do: {done, count}
+  defp reverse_and_count([h | t], done, count), do: reverse_and_count(t, [h | done], count + 1)
 
   @doc """
   Add a new client event.
@@ -45,11 +43,11 @@ defmodule ECSx.ClientEvents do
 
   ## Examples
 
-    # Simple event requiring no metadata
-    ECSx.ClientEvents.add(player_id, :spawn_player)
+      # Simple event requiring no metadata
+      ECSx.ClientEvents.add(player_id, :spawn_player)
 
-    # Event with metadata
-    ECSx.ClientEvents.add(player_id, {:send_message_to, recipient_id, message})
+      # Event with metadata
+      ECSx.ClientEvents.add(player_id, {:send_message_to, recipient_id, message})
 
   """
   @spec add(id(), any()) :: :ok

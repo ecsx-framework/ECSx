@@ -28,8 +28,8 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   end
 
   def run([system_name | _] = _args) do
-    create_system_file(system_name)
     inject_system_module_into_manager(system_name)
+    create_system_file(system_name)
   end
 
   defp create_system_file(system_name) do
@@ -42,7 +42,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   end
 
   defp inject_system_module_into_manager(system_name) do
-    manager_path = "lib/#{Helpers.otp_app()}/manager.ex"
+    manager_path = ECSx.manager_path()
     {before_systems, after_systems, list} = parse_manager(manager_path)
 
     new_list =
@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   end
 
   defp parse_manager(path) do
-    file = File.read!(path)
+    file = Helpers.read_manager_file!(path)
     [top, rest] = String.split(file, "def systems do", parts: 2)
     [list, bottom] = String.split(rest, "end", parts: 2)
 

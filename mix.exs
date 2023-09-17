@@ -2,7 +2,7 @@ defmodule ECSx.MixProject do
   use Mix.Project
 
   @gh_url "https://github.com/APB9785/ECSx"
-  @version "0.3.1"
+  @version "0.4.0"
 
   def project do
     [
@@ -15,7 +15,8 @@ defmodule ECSx.MixProject do
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
+        "coveralls.html": :test,
+        coverage_report: :test
       ],
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -26,13 +27,15 @@ defmodule ECSx.MixProject do
 
       # Docs
       name: "ECSx",
-      docs: docs()
+      docs: docs(),
+      aliases: aliases()
     ]
   end
 
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      mod: {ECSx, []},
       extra_applications: [:logger, :eex, :mix]
     ]
   end
@@ -40,9 +43,11 @@ defmodule ECSx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.28", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.29", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:excoveralls, "~> 0.14", only: :test}
+      {:excoveralls, "~> 0.14", only: :test},
+      {:telemetry, "~> 1.0"},
+      {:mix_test_watch, "~> 1.1", only: [:dev], runtime: false}
     ]
   end
 
@@ -50,9 +55,15 @@ defmodule ECSx.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
+  def aliases do
+    [
+      coverage_report: [&coverage_report/1]
+    ]
+  end
+
   defp package do
     [
-      maintainers: ["Andrew P Berrien"],
+      maintainers: ["Andrew P Berrien", "Mike Binns"],
       licenses: ["GPL-3.0"],
       links: %{
         "Changelog" => "#{@gh_url}/blob/master/CHANGELOG.md",
@@ -68,17 +79,44 @@ defmodule ECSx.MixProject do
       logo: nil,
       extra_section: "GUIDES",
       source_url: @gh_url,
-      extras: extras()
+      extras: extras(),
+      groups_for_extras: groups_for_extras()
     ]
   end
 
   defp extras do
     [
       "guides/installation.md",
+      "CHANGELOG.md",
+      "guides/upgrade_guide.md",
       "guides/ecs_design.md",
-      "guides/tutorial.md",
-      "guides/web_frontend_liveview.md",
-      "guides/common_caveats.md"
+      "guides/tutorial/initial_setup.md",
+      "guides/tutorial/backend_basics.md",
+      "guides/tutorial/web_frontend_liveview.md"
+    ]
+  end
+
+  defp coverage_report(_) do
+    Mix.Task.run("coveralls.html")
+
+    open_cmd =
+      case :os.type() do
+        {:win32, _} ->
+          "start"
+
+        {:unix, :darwin} ->
+          "open"
+
+        {:unix, _} ->
+          "xdg-open"
+      end
+
+    System.cmd(open_cmd, ["cover/excoveralls.html"])
+  end
+
+  defp groups_for_extras do
+    [
+      "Tutorial Project": ~r/guides\/tutorial\/.?/
     ]
   end
 end

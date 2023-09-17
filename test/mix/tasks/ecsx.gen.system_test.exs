@@ -23,10 +23,12 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                  @moduledoc \"\"\"
                  Documentation for FooSystem system.
                  \"\"\"
-                 use ECSx.System
+                 @behaviour ECSx.System
 
+                 @impl ECSx.System
                  def run do
                    # System logic
+                   :ok
                  end
                end
                """
@@ -45,10 +47,18 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                  @moduledoc \"\"\"
                  ECSx manager.
                  \"\"\"
-                 use ECSx.Manager, tick_rate: 20
+                 use ECSx.Manager
 
-                 setup do
-                   # Load your initial components
+                 def setup do
+                   # Seed persistent components only for the first server start
+                   # (This will not be run on subsequent app restarts)
+                   :ok
+                 end
+
+                 def startup do
+                   # Load ephemeral components during first server start and again
+                   # on every subsequent app restart
+                   :ok
                  end
 
                  # Declare all valid Component types
@@ -82,10 +92,18 @@ defmodule Mix.Tasks.Ecsx.Gen.SystemTest do
                  @moduledoc \"\"\"
                  ECSx manager.
                  \"\"\"
-                 use ECSx.Manager, tick_rate: 20
+                 use ECSx.Manager
 
-                 setup do
-                   # Load your initial components
+                 def setup do
+                   # Seed persistent components only for the first server start
+                   # (This will not be run on subsequent app restarts)
+                   :ok
+                 end
+
+                 def startup do
+                   # Load ephemeral components during first server start and again
+                   # on every subsequent app restart
+                   :ok
                  end
 
                  # Declare all valid Component types

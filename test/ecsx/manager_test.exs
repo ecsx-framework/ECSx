@@ -1,12 +1,19 @@
 defmodule ECSx.ManagerTest do
   use ExUnit.Case
 
+  import ExUnit.CaptureLog
+
   defmodule AppToSetup do
     use ECSx.Manager
 
-    ECSx.Manager.setup do
-      :ets.insert(:test, {123, "foo"})
-      :ets.insert(:test, {456, "bar"})
+    def setup do
+      send(self(), :setup)
+      :ok
+    end
+
+    def startup do
+      send(self(), :startup)
+      :ok
     end
 
     def components, do: []
@@ -14,15 +21,15 @@ defmodule ECSx.ManagerTest do
   end
 
   describe "setup/1" do
-    test "creates handle_continue/2 which runs code block" do
-      :ets.new(:test, [:named_table])
+    test "handle_continue/2 runs startup code block" do
+      {result, log} =
+        with_log(fn ->
+          AppToSetup.handle_continue(:start_systems, "state")
+        end)
 
-      assert AppToSetup.handle_continue(:setup, "state") ==
-               {:noreply, "state", {:continue, :start_systems}}
-
-      assert :test
-             |> :ets.tab2list()
-             |> Enum.sort() == [{123, "foo"}, {456, "bar"}]
+      assert result == {:noreply, "state"}
+      assert log =~ "[info] Retrieved Components"
+      assert_receive :startup
     end
   end
 end
