@@ -47,3 +47,13 @@ Instead:
   * If the request is made once, but triggered by input to some client process, that process should make the request (or spawn a `Task` for it)
   * If the request should happen regularly, create a new [`GenServer`](https://hexdocs.pm/elixir/GenServer.html#module-receiving-regular-messages) (don't forget to add it to your app's supervision tree)
   * If you have more than one external request happening regularly, this is a good use case for the [`Oban`](https://hexdocs.pm/oban/Oban.html) library
+  * Remember that client processes (including GenServers, LiveViews, and Oban) have read-only access
+  to components, and must use `ECSx.ClientEvents` for writes
+
+  ## search/1 Without Index
+
+  `ECSx.Component.search/1` will scan all Components of the given type to find matches.  This can be
+  OK if the quantity of Components of that type is small, or if it is just a one-time search.  But
+  if you are searching every tick within a System, through a large list of Components, this can become
+  a performance concern.  The solution is to set the `index: true` option, which will drastically
+  improve search performance.
