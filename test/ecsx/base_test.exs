@@ -17,8 +17,8 @@ defmodule ECSx.BaseTest do
              ]
     end
 
-    test "with reverse index" do
-      assert :ok == Base.add(:nonunique_component, 123, "test", reverse_index: true)
+    test "with index" do
+      assert :ok == Base.add(:nonunique_component, 123, "test", index: true)
 
       index_table = Module.concat(:nonunique_component, "Index")
 
@@ -45,8 +45,8 @@ defmodule ECSx.BaseTest do
                    end
     end
 
-    test "with reverse index" do
-      assert :ok == Base.add_new(:sample_component, 123, "test", reverse_index: true)
+    test "with index" do
+      assert :ok == Base.add_new(:sample_component, 123, "test", index: true)
 
       index_table = Module.concat(:sample_component, "Index")
 
@@ -71,12 +71,12 @@ defmodule ECSx.BaseTest do
                    end
     end
 
-    test "with reverse index" do
+    test "with index" do
       :ets.insert(:sample_component, {123, "test", false})
       index_table = Module.concat(:sample_component, "Index")
       :ets.insert(index_table, {"test", 123, false})
 
-      assert :ok == Base.update(:sample_component, 123, "test2", reverse_index: true)
+      assert :ok == Base.update(:sample_component, 123, "test2", index: true)
       assert :ets.tab2list(index_table) == [{"test2", 123, false}]
     end
   end

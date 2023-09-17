@@ -10,7 +10,7 @@ defmodule ECSx.Base do
       Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
     end
 
-    if Keyword.get(opts, :reverse_index) do
+    if Keyword.get(opts, :index) do
       index_table = Module.concat(component_type, "Index")
       :ets.insert(index_table, {value, id, persist})
     end
@@ -28,7 +28,7 @@ defmodule ECSx.Base do
           Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
         end
 
-        if Keyword.get(opts, :reverse_index) do
+        if Keyword.get(opts, :index) do
           index_table = Module.concat(component_type, "Index")
           :ets.insert(index_table, {value, id, persist})
         end
@@ -55,7 +55,7 @@ defmodule ECSx.Base do
 
     case :ets.lookup(component_type, id) do
       [{id, old_value, persist}] ->
-        if Keyword.get(opts, :reverse_index) do
+        if Keyword.get(opts, :index) do
           index_table = Module.concat(component_type, "Index")
           :ets.delete_object(index_table, {old_value, id, persist})
           :ets.insert(index_table, {value, id, persist})
@@ -119,7 +119,7 @@ defmodule ECSx.Base do
   end
 
   def search(component_type, value, opts) do
-    if Keyword.get(opts, :reverse_index) do
+    if Keyword.get(opts, :index) do
       component_type
       |> Module.concat("Index")
       |> :ets.lookup(value)
@@ -179,7 +179,7 @@ defmodule ECSx.Base do
   def init(table_name, table_type, concurrency, opts) do
     :ets.new(table_name, [:named_table, table_type, concurrency])
 
-    if Keyword.get(opts, :reverse_index) do
+    if Keyword.get(opts, :index) do
       index_table = Module.concat(table_name, "Index")
       :ets.new(index_table, [:named_table, :bag])
     end

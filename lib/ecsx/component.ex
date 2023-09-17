@@ -20,7 +20,7 @@ defmodule ECSx.Component do
 
     * `:value` - The type of value which will be stored in this component type.  Valid types are: `:atom, :binary, :datetime, :float, :integer`
     * `:unique` - When `true`, each entity may have, at most, one component of this type;  attempting to add another will overwrite the first.  When `false`, an entity may have many components of this type.
-    * `:reverse_index` - When `true`, the `search/1` function will be much more efficient, at the cost of slightly higher write times.  Defaults to `false`
+    * `:index` - When `true`, the `search/1` function will be much more efficient, at the cost of slightly higher write times.  Defaults to `false`
     * `:log_edits` - When `true`, log messages will be emitted for each component added, updated, or removed.  Defaults to `false`
     * `:read_concurrency` - When `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
 
@@ -38,7 +38,7 @@ defmodule ECSx.Component do
       @valid_value_types ~w(atom binary datetime float integer)a
       @component_opts [
         log_edits: opts[:log_edits] || false,
-        reverse_index: opts[:reverse_index] || false
+        index: opts[:index] || false
       ]
 
       @table_type (case(Keyword.get(opts, :unique, true)) do
@@ -207,7 +207,7 @@ defmodule ECSx.Component do
   @doc """
   Look up all IDs for entities which have a component of this type with a given value.
 
-  This function is significantly optimized by the `:reverse_index` option.  For component
+  This function is significantly optimized by the `:index` option.  For component
   types which are regularly searched, it is highly recommended to set this option to `true`.
 
   ## Example
