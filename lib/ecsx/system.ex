@@ -23,5 +23,5 @@ defmodule ECSx.System do
 
   Note:  A crash inside this function will restart the entire app!
   """
-  @callback run() :: :ok
+  @callback run() :: any()
 end

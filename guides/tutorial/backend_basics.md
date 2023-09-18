@@ -69,9 +69,6 @@ defmodule Ship.Systems.Driver do
       new_y_position = y_position + y_velocity
       YPosition.update(entity, new_y_position)
     end
-
-    # run/0 should always return :ok
-    :ok
   end
 end
 ```
@@ -404,8 +401,6 @@ def startup do
     Ship.Components.XVelocity.add(entity, 0)
     Ship.Components.YVelocity.add(entity, 0)
   end
-
-  :ok
 end
 ```
 
