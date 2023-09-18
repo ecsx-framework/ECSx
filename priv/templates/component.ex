@@ -4,5 +4,5 @@ defmodule <%= app_name %>.Components.<%= component_type %> do
   """
   use ECSx.Component,
     value: <%= inspect(value) %>,
-    unique: <%= unique %>
+    unique: <%= unique %><%= if index, do: ",\n    index: true", else: "" %>
 end
