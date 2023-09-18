@@ -6,6 +6,8 @@ defmodule ECSx.ClientEvents do
   system using `get_and_clear/0`.  You will be required to create the handler system yourself -
   see the [tutorial project](web_frontend_liveview.html#handling-client-events) for a detailed example.
   """
+
+  @doc false
   use GenServer
 
   @type id :: any()
