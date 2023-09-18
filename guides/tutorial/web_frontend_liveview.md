@@ -832,3 +832,39 @@ Lastly - `cannonball.svg` - we will make this file from scratch!
 ```
 
 The `width` and `height` values will be overriden by our LiveView render's `width="1" height="1"`, but they still play an important role - because the circle's parameters will be measured relative to these - so we'll set them to `100` for simplicity.  `cx` and `cy` represent the coordinates for the center of the circle, which should be one-half the `width` and `height`.  The size of the circle will be set with `r` (radius) and `stroke-width` (the border around the circle) - we can calculate `diameter = 2 * (r + stroke_width) = 60`.  This diameter is also relative, so when our `cannonball.svg` is scaled down to `1 x 1`, the visible circle will be `0.6 x 0.6`
+
+## Limiting Ship Movement
+
+You might notice that that once the ship hits the edge of the world map it keeps moving and disappears from sight. This happens because we keep updating the ship's position regardless of it being within the limits of the map.
+
+To solve this, let's go to the `Driver` system and limit the position range for the player ship:
+
+```elixir
+defmodule Ship.Systems.Driver do
+  ...
+  def run do
+    for {entity, x_velocity} <- XVelocity.get_all() do
+      ...
+      new_x_position = calculate_new_position(x_position, x_velocity)
+      ...
+    end
+
+    for {entity, y_velocity} <- YVelocity.get_all() do
+      ...
+      new_y_position = calculate_new_position(y_position, y_velocity)
+      ...
+    end
+    ...
+  end
+
+  # Do not let player ship move past the map limit
+  defp calculate_new_position(current_position, velocity) do
+    new_position = current_position + velocity
+    new_position = Enum.min([new_position, 99])
+
+    Enum.max([new_position, 0])
+  end
+end
+```
+
+This will limit the position for the ship on both X and Y axis to be between 0 and 99 (the size of the 100x100 world map).
