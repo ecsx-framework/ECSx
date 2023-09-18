@@ -90,6 +90,7 @@ defmodule ECSx.MixProject do
       "CHANGELOG.md",
       "guides/upgrade_guide.md",
       "guides/ecs_design.md",
+      "guides/common_caveats.md",
       "guides/tutorial/initial_setup.md",
       "guides/tutorial/backend_basics.md",
       "guides/tutorial/web_frontend_liveview.md"
