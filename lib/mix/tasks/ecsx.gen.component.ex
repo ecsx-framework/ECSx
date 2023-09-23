@@ -42,11 +42,11 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     |> Mix.raise()
   end
 
-  def run([component_type_name, value_type]) do
+  def run([component_type_name, value_type | opts]) do
     value_type = validate(value_type)
     {opts, _, _} = OptionParser.parse(opts, strict: [index: :boolean])
     Helpers.inject_component_module_into_manager(component_type_name)
-    create_component_file(component_type_name, value_type)
+    create_component_file(component_type_name, value_type, opts)
   end
 
   defp message_with_help(message) do
@@ -67,7 +67,7 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
   defp validate(_),
     do: Mix.raise("Invalid value type. Possible types are: #{inspect(@valid_value_types)}")
 
-  defp create_component_file(component_type_name, value_type) do
+  defp create_component_file(component_type_name, value_type, opts) do
     filename = Macro.underscore(component_type_name)
     target = "lib/#{Helpers.otp_app()}/components/#{filename}.ex"
     source = Application.app_dir(:ecsx, "/priv/templates/component.ex")
