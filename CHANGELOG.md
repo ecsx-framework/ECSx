@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.5 (2023-09-23)
+
+  * Non-unique Component types are no longer allowed (see the [upgrade guide](upgrade_guide.html))
+  * Component modules now accept option `:index` to index components for better `search/2` performance
+  * `mix ecsx.gen.component` now accepts option `--index` to automatically set `index: true`
+  * Component callback `get_one/2` has been renamed `get/2`
+  * Systems' `run/0` no longer requires `:ok` return value
+  * Manager `setup/0` and `startup/0` no longer require `:ok` return value
+
 ## v0.4 (2023-06-02)
 
   * Adding ECSx.ClientEvents to your supervision tree is no longer required  
