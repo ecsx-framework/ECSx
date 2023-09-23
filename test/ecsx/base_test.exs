@@ -4,7 +4,12 @@ defmodule ECSx.BaseTest do
   alias ECSx.Base
 
   setup do
-    :ets.new(:sample_component, [:named_table])
+    table_name = :sample_component
+    :ets.new(table_name, [:named_table])
+
+    index_table = Module.concat(table_name, "Index")
+    :ets.new(index_table, [:named_table, :bag])
+
     :ok
   end
 
@@ -26,7 +31,7 @@ defmodule ECSx.BaseTest do
     end
 
     test "with index" do
-      assert :ok == Base.add_new(:sample_component, 123, "test", index: true)
+      assert :ok == Base.add(:sample_component, 123, "test", index: true)
 
       index_table = Module.concat(:sample_component, "Index")
 

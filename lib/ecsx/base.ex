@@ -6,22 +6,6 @@ defmodule ECSx.Base do
   def add(component_type, id, value, opts) do
     persist = Keyword.get(opts, :persist, false)
 
-    if Keyword.get(opts, :log_edits) do
-      Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
-    end
-
-    if Keyword.get(opts, :index) do
-      index_table = Module.concat(component_type, "Index")
-      :ets.insert(index_table, {value, id, persist})
-    end
-
-    :ets.insert(component_type, {id, value, persist})
-    :ok
-  end
-
-  def add_new(component_type, id, value, opts) do
-    persist = Keyword.get(opts, :persist, false)
-
     case :ets.lookup(component_type, id) do
       [] ->
         if Keyword.get(opts, :log_edits) do

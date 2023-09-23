@@ -136,7 +136,6 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
                  \"\"\"
                  use ECSx.Component,
                    value: :binary,
-                   unique: true,
                    index: true
                end
                """
