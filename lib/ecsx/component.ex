@@ -63,7 +63,7 @@ defmodule ECSx.Component do
       case Keyword.get(opts, :unique) do
         true ->
           msg = "Component option `:unique` no longer has any effect"
-          IO.warn(msg, Macro.Env.stacktrace(env))
+          IO.warn(msg, Macro.Env.stacktrace(__ENV__))
           :ok
 
         false ->
