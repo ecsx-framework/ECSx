@@ -22,15 +22,14 @@ defmodule ECSx.Tag do
     quote bind_quoted: [opts: opts] do
       @behaviour ECSx.Tag
 
-      @table_type :set
       @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
       @tag_opts [log_edits: opts[:log_edits] || false]
 
-      def init, do: ECSx.Base.init(@table_name, @table_type, @concurrency)
+      def init, do: ECSx.Base.init(@table_name, @concurrency, @tag_opts)
 
       def add(entity_id, opts \\ []),
-        do: ECSx.Base.add_new(@table_name, entity_id, nil, Keyword.merge(opts, @tag_opts))
+        do: ECSx.Base.add(@table_name, entity_id, nil, Keyword.merge(opts, @tag_opts))
 
       def load(component), do: ECSx.Base.load(@table_name, component)
 
