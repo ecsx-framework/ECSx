@@ -13,13 +13,17 @@ ECSx is an Entity-Component-System (ECS) framework for Elixir. ECS is an archite
 ```elixir
 def deps do
   [
-    {:ecsx, "~> 0.4"}
+    {:ecsx, "~> 0.5"}
   ]
 end
 ```
 
 - Run `mix deps.get`
 - Run `mix ecsx.setup`
+
+## Upgrading
+
+While ECSx is pre-v1.0, minor version updates will contain breaking changes.  If you are upgrading an application from ECSx 0.4.x or earlier, please refer to our [upgrade guide](upgrade_guide.html).
 
 ## Tutorial Project
 
