@@ -24,6 +24,14 @@ defmodule ECSx.BaseTest do
                      Base.add(:sample_component, 123, "test", [])
                    end
     end
+
+    test "with index" do
+      assert :ok == Base.add_new(:sample_component, 123, "test", index: true)
+
+      index_table = Module.concat(:sample_component, "Index")
+
+      assert :ets.tab2list(index_table) == [{"test", 123, false}]
+    end
   end
 
   describe "#update/4" do
@@ -39,6 +47,15 @@ defmodule ECSx.BaseTest do
                    fn ->
                      Base.update(:sample_component, 123, "test2", [])
                    end
+    end
+
+    test "with index" do
+      :ets.insert(:sample_component, {123, "test", false})
+      index_table = Module.concat(:sample_component, "Index")
+      :ets.insert(index_table, {"test", 123, false})
+
+      assert :ok == Base.update(:sample_component, 123, "test2", index: true)
+      assert :ets.tab2list(index_table) == [{"test2", 123, false}]
     end
   end
 

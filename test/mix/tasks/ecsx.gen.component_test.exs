@@ -122,6 +122,27 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
     end)
   end
 
+  test "accepts index option" do
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "binary", "--index"])
+
+      component_file = File.read!("lib/my_app/components/foo_component.ex")
+
+      assert component_file ==
+               """
+               defmodule MyApp.Components.FooComponent do
+                 @moduledoc \"\"\"
+                 Documentation for FooComponent components.
+                 \"\"\"
+                 use ECSx.Component,
+                   value: :binary,
+                   unique: true,
+                   index: true
+               end
+               """
+    end)
+  end
+
   test "fails with invalid arguments" do
     Mix.Project.in_project(:my_app, ".", fn _module ->
       # Missing argument

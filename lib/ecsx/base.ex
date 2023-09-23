@@ -6,10 +6,31 @@ defmodule ECSx.Base do
   def add(component_type, id, value, opts) do
     persist = Keyword.get(opts, :persist, false)
 
+    if Keyword.get(opts, :log_edits) do
+      Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
+    end
+
+    if Keyword.get(opts, :index) do
+      index_table = Module.concat(component_type, "Index")
+      :ets.insert(index_table, {value, id, persist})
+    end
+
+    :ets.insert(component_type, {id, value, persist})
+    :ok
+  end
+
+  def add_new(component_type, id, value, opts) do
+    persist = Keyword.get(opts, :persist, false)
+
     case :ets.lookup(component_type, id) do
       [] ->
         if Keyword.get(opts, :log_edits) do
           Logger.debug("#{component_type} add #{inspect(id)}: #{inspect(value)}")
+        end
+
+        if Keyword.get(opts, :index) do
+          index_table = Module.concat(component_type, "Index")
+          :ets.insert(index_table, {value, id, persist})
         end
 
         :ets.insert(component_type, {id, value, persist})
@@ -33,7 +54,13 @@ defmodule ECSx.Base do
     end
 
     case :ets.lookup(component_type, id) do
-      [{id, _old_value, persist}] ->
+      [{id, old_value, persist}] ->
+        if Keyword.get(opts, :index) do
+          index_table = Module.concat(component_type, "Index")
+          :ets.delete_object(index_table, {old_value, id, persist})
+          :ets.insert(index_table, {value, id, persist})
+        end
+
         :ets.insert(component_type, {id, value, persist})
         :ok
 
@@ -86,10 +113,17 @@ defmodule ECSx.Base do
     |> Enum.map(&elem(&1, 0))
   end
 
-  def search(component_type, value) do
-    component_type
-    |> :ets.match({:"$1", value, :_})
-    |> List.flatten()
+  def search(component_type, value, opts) do
+    if Keyword.get(opts, :index) do
+      component_type
+      |> Module.concat("Index")
+      |> :ets.lookup(value)
+      |> Enum.map(fn {_value, id, _persist} -> id end)
+    else
+      component_type
+      |> :ets.match({:"$1", value, :_})
+      |> List.flatten()
+    end
   end
 
   def between(component_type, min, max) do
@@ -119,8 +153,14 @@ defmodule ECSx.Base do
     :ets.member(component_type, entity_id)
   end
 
-  def init(table_name, concurrency) do
+  def init(table_name, concurrency, opts) do
     :ets.new(table_name, [:named_table, :set, concurrency])
+
+    if Keyword.get(opts, :index) do
+      index_table = Module.concat(table_name, "Index")
+      :ets.new(index_table, [:named_table, :bag])
+    end
+
     :ok
   end
 end

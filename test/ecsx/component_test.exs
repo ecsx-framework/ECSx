@@ -47,14 +47,17 @@ defmodule ECSx.ComponentTest do
 
   describe "#between/2" do
     test "exists for integer component type" do
+      Code.ensure_loaded(IntegerComponent)
       assert function_exported?(IntegerComponent, :between, 2)
     end
 
     test "does not exist for non-numerical component types" do
+      Code.ensure_loaded(StringComponent)
       refute function_exported?(StringComponent, :between, 2)
     end
 
     test "arguments must be numerical" do
+      Code.ensure_loaded(IntegerComponent)
       assert_raise FunctionClauseError, fn -> IntegerComponent.between(0, "five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.between(:zero, 5) end
     end
@@ -62,14 +65,17 @@ defmodule ECSx.ComponentTest do
 
   describe "#at_least/1" do
     test "exists for integer component type" do
+      Code.ensure_loaded(IntegerComponent)
       assert function_exported?(IntegerComponent, :at_least, 1)
     end
 
     test "does not exist for non-numerical component types" do
+      Code.ensure_loaded(StringComponent)
       refute function_exported?(StringComponent, :at_least, 1)
     end
 
     test "argument must be numerical" do
+      Code.ensure_loaded(IntegerComponent)
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_least("five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_least(:five) end
     end
@@ -77,14 +83,17 @@ defmodule ECSx.ComponentTest do
 
   describe "#at_most/1" do
     test "exists for integer component type" do
+      Code.ensure_loaded(IntegerComponent)
       assert function_exported?(IntegerComponent, :at_most, 1)
     end
 
     test "does not exist for non-numerical component types" do
+      Code.ensure_loaded(StringComponent)
       refute function_exported?(StringComponent, :at_most, 1)
     end
 
     test "argument must be numerical" do
+      Code.ensure_loaded(IntegerComponent)
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_most("five") end
       assert_raise FunctionClauseError, fn -> IntegerComponent.at_most(:five) end
     end

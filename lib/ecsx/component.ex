@@ -18,6 +18,7 @@ defmodule ECSx.Component do
   ### Options
 
     * `:value` - The type of value which will be stored in this component type.  Valid types are: `:atom, :binary, :datetime, :float, :integer`
+    * `:index` - When `true`, the `search/1` function will be much more efficient, at the cost of slightly higher write times.  Defaults to `false`
     * `:log_edits` - When `true`, log messages will be emitted for each component added, updated, or removed.  Defaults to `false`
     * `:read_concurrency` - When `true`, enables read concurrency for this component table.  Only set this if you know what you're doing.  Defaults to `false`
 
@@ -33,7 +34,10 @@ defmodule ECSx.Component do
       @table_name __MODULE__
       @concurrency {:read_concurrency, opts[:read_concurrency] || false}
       @valid_value_types ~w(atom binary datetime float integer)a
-      @component_opts [log_edits: opts[:log_edits] || false]
+      @component_opts [
+        log_edits: opts[:log_edits] || false,
+        index: opts[:index] || false
+      ]
 
       # Sets up value type validation
       case Keyword.fetch!(opts, :value) do
@@ -73,7 +77,7 @@ defmodule ECSx.Component do
           :ok
       end
 
-      def init, do: ECSx.Base.init(@table_name, @concurrency)
+      def init, do: ECSx.Base.init(@table_name, @concurrency, @component_opts)
 
       def load(component), do: ECSx.Base.load(@table_name, component)
 
@@ -89,7 +93,7 @@ defmodule ECSx.Component do
 
       def get_all_persist, do: ECSx.Base.get_all_persist(@table_name)
 
-      def search(value), do: ECSx.Base.search(@table_name, value)
+      def search(value), do: ECSx.Base.search(@table_name, value, @component_opts)
 
       def remove(entity_id), do: ECSx.Base.remove(@table_name, entity_id, @component_opts)
 
@@ -171,6 +175,9 @@ defmodule ECSx.Component do
 
   @doc """
   Look up all IDs for entities which have a component of this type with a given value.
+
+  This function is significantly optimized by the `:index` option.  For component
+  types which are regularly searched, it is highly recommended to set this option to `true`.
 
   ## Example
 

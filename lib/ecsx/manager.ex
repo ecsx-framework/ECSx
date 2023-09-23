@@ -27,7 +27,7 @@ defmodule ECSx.Manager do
   is a fresh server or a subsequent start.
 
   These functions will be run during the Manager's initialization. The Component tables
-  will be created before they are executed.  Return value should be `:ok`
+  will be created before they are executed.
 
   ## Example
 
@@ -41,8 +41,6 @@ defmodule ECSx.Manager do
         YourApp.Components.YPosition.add(tree.id, tree.y_coord, persist: true)
         YourApp.Components.Type.add(tree.id, "Tree", persist: true)
       end
-
-      :ok
     end
 
     def startup do
@@ -52,8 +50,6 @@ defmodule ECSx.Manager do
         YourApp.Components.XPosition.add(spawn_location.id, spawn_location.x_coord)
         YourApp.Components.YPosition.add(spawn_location.id, spawn_location.y_coord)
       end
-
-      :ok
     end
   end
   ```
@@ -139,10 +135,8 @@ defmodule ECSx.Manager do
   have been initialized, before any systems have started.
 
   Except for very rare circumstances, all components added here should have `persist: true`
-
-  Setup should return `:ok`
   """
-  @callback setup() :: :ok
+  @callback setup() :: any()
 
   @doc """
   Loads ephemeral component data each time the app is started.
@@ -151,10 +145,8 @@ defmodule ECSx.Manager do
   app reboots.  It runs after component tables have been initialized, before any systems have started.
 
   Except for very rare circumstances, components added here should *not* be persisted.
-
-  Startup should return `:ok`
   """
-  @callback startup() :: :ok
+  @callback startup() :: any()
 
   @doc false
   def start_link(module) do
