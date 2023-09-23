@@ -24,28 +24,7 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
                  Documentation for FooComponent components.
                  \"\"\"
                  use ECSx.Component,
-                   value: :binary,
-                   unique: true
-               end
-               """
-    end)
-  end
-
-  test "generates module for non-unique component type" do
-    Mix.Project.in_project(:my_app, ".", fn _module ->
-      Mix.Tasks.Ecsx.Gen.Component.run(["FooComponent", "binary", "--no-unique"])
-
-      component_file = File.read!("lib/my_app/components/foo_component.ex")
-
-      assert component_file ==
-               """
-               defmodule MyApp.Components.FooComponent do
-                 @moduledoc \"\"\"
-                 Documentation for FooComponent components.
-                 \"\"\"
-                 use ECSx.Component,
-                   value: :binary,
-                   unique: false
+                   value: :binary
                end
                """
     end)
@@ -157,7 +136,6 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
                  \"\"\"
                  use ECSx.Component,
                    value: :binary,
-                   unique: true,
                    index: true
                end
                """

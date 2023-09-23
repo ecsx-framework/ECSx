@@ -1,5 +1,15 @@
 # Upgrade Guide
 
+## 0.4 to 0.5
+
+Non-unique Component types are no longer allowed.  Setting the `:unique` option from within a Component
+module now has no effect.  If you are currently using non-unique Component types in your application,
+you must replace them with Entities as described in the [one_to_many guide](ecs_design.html#one-to-many-associations).
+
+Component read/write changes:
+
+  * `MyComponent.get_one/1` should be renamed to `MyComponent.get/1`
+
 ## 0.3.x to 0.4
 
 In `manager.ex`:

@@ -60,9 +60,9 @@ defmodule ShipWeb.GameLive do
 
   def handle_info(:load_player_info, socket) do
     # This will run every 50ms to keep the client assigns updated
-    x = XPosition.get_one(socket.assigns.player_entity)
-    y = YPosition.get_one(socket.assigns.player_entity)
-    hp = HullPoints.get_one(socket.assigns.player_entity)
+    x = XPosition.get(socket.assigns.player_entity)
+    y = YPosition.get(socket.assigns.player_entity)
+    hp = HullPoints.get(socket.assigns.player_entity)
 
     {:noreply, assign(socket, x_coord: x, y_coord: y, current_hp: hp)}
   end
@@ -290,9 +290,9 @@ defmodule ShipWeb.GameLive do
 
   # Our previous :load_player_info handler becomes a shared helper for the new handlers
   defp assign_player_ship(socket) do
-    x = XPosition.get_one(socket.assigns.player_entity)
-    y = YPosition.get_one(socket.assigns.player_entity)
-    hp = HullPoints.get_one(socket.assigns.player_entity)
+    x = XPosition.get(socket.assigns.player_entity)
+    y = YPosition.get(socket.assigns.player_entity)
+    hp = HullPoints.get(socket.assigns.player_entity)
 
     assign(socket, x_coord: x, y_coord: y, current_hp: hp)
   end
@@ -458,10 +458,10 @@ defmodule ShipWeb.GameLive do
   end
 
   defp assign_player_ship(socket) do
-    x = XPosition.get_one(socket.assigns.player_entity)
-    y = YPosition.get_one(socket.assigns.player_entity)
-    hp = HullPoints.get_one(socket.assigns.player_entity)
-    image = ImageFile.get_one(socket.assigns.player_entity)
+    x = XPosition.get(socket.assigns.player_entity)
+    y = YPosition.get(socket.assigns.player_entity)
+    hp = HullPoints.get(socket.assigns.player_entity)
+    image = ImageFile.get(socket.assigns.player_entity)
 
     assign(socket, x_coord: x, y_coord: y, current_hp: hp, player_ship_image_file: image)
   end
@@ -475,9 +475,9 @@ defmodule ShipWeb.GameLive do
 
   defp all_ships do
     for {ship, _hp} <- HullPoints.get_all() do
-      x = XPosition.get_one(ship)
-      y = YPosition.get_one(ship)
-      image = ImageFile.get_one(ship)
+      x = XPosition.get(ship)
+      y = YPosition.get(ship)
+      image = ImageFile.get(ship)
       {ship, x, y, image}
     end
   end
@@ -595,9 +595,9 @@ defmodule Ship.Systems.Attacking do
   end
 
   defp spawn_projectile(self, target) do
-    attack_damage = AttackDamage.get_one(self)
-    x = XPosition.get_one(self)
-    y = YPosition.get_one(self)
+    attack_damage = AttackDamage.get(self)
+    x = XPosition.get(self)
+    y = YPosition.get(self)
     # Armor reduction should wait until impact to be calculated
     cannonball_entity = Ecto.UUID.generate()
 
@@ -639,7 +639,7 @@ defmodule Ship.Systems.Projectile do
     projectiles = IsProjectile.get_all()
       
     Enum.each(projectiles, fn projectile ->
-      case ProjectileTarget.get_one(projectile, nil) do
+      case ProjectileTarget.get(projectile, nil) do
         nil ->
           # The target has already been destroyed
           destroy_projectile(projectile)
@@ -666,15 +666,15 @@ defmodule Ship.Systems.Projectile do
   end
 
   defp get_distance_to_target(projectile, target) do
-    target_x = XPosition.get_one(target)
-    target_y = YPosition.get_one(target)
-    target_dx = XVelocity.get_one(target)
-    target_dy = YVelocity.get_one(target)
+    target_x = XPosition.get(target)
+    target_y = YPosition.get(target)
+    target_dx = XVelocity.get(target)
+    target_dy = YVelocity.get(target)
     target_next_x = target_x + target_dx
     target_next_y = target_y + target_dy
 
-    x = XPosition.get_one(projectile)
-    y = YPosition.get_one(projectile)
+    x = XPosition.get(projectile)
+    y = YPosition.get(projectile)
 
     dx = target_next_x - x
     dy = target_next_y - y
@@ -688,11 +688,11 @@ defmodule Ship.Systems.Projectile do
   end
 
   defp damage_target(projectile, target) do
-    damage = ProjectileDamage.get_one(projectile)
-    reduction_from_armor = ArmorRating.get_one(target)
+    damage = ProjectileDamage.get(projectile)
+    reduction_from_armor = ArmorRating.get(target)
     final_damage_amount = damage - reduction_from_armor
 
-    target_current_hp = HullPoints.get_one(target)
+    target_current_hp = HullPoints.get(target)
     target_new_hp = target_current_hp - final_damage_amount
 
     HullPoints.update(target, target_new_hp)
@@ -786,9 +786,9 @@ defmodule Ship.GameLive do
   defp assign_projectiles(socket) do
     projectiles =
       for projectile <- IsProjectile.get_all() do
-        x = XPosition.get_one(projectile)
-        y = YPosition.get_one(projectile)
-        image = ImageFile.get_one(projectile)
+        x = XPosition.get(projectile)
+        y = YPosition.get(projectile)
+        image = ImageFile.get(projectile)
         {projectile, x, y, image}
       end
 

@@ -16,10 +16,6 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
     * float
     * integer
 
-  By default, new component types are generated with `unique: true`, which allows an entity to have at most one component of this type at any given time.  To override this, use the `--no-unique` flag:
-
-      $ mix ecsx.gen.component Friendship binary --no-unique
-
   If you know you want components of this type to be indexed for improved `ECSx.Component.search/1` performance,
   you may include the `--index` option:
 
@@ -48,7 +44,7 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
 
   def run([component_type_name, value_type | opts]) do
     value_type = validate(value_type)
-    {opts, _, _} = OptionParser.parse(opts, strict: [unique: :boolean, index: :boolean])
+    {opts, _, _} = OptionParser.parse(opts, strict: [index: :boolean])
     Helpers.inject_component_module_into_manager(component_type_name)
     create_component_file(component_type_name, value_type, opts)
   end
@@ -78,7 +74,6 @@ defmodule Mix.Tasks.Ecsx.Gen.Component do
 
     binding = [
       app_name: Helpers.root_module(),
-      unique: Keyword.get(opts, :unique, true),
       index: Keyword.get(opts, :index, false),
       component_type: component_type_name,
       value: value_type

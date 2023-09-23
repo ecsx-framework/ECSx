@@ -10,7 +10,7 @@ defmodule ECSx.ComponentTest do
 
       assert :ok == StringComponent.add(11, "Andy")
 
-      assert "Andy" == StringComponent.get_one(11)
+      assert "Andy" == StringComponent.get(11)
 
       for {id, foo} <- [{1, "A"}, {2, "B"}, {3, "C"}],
           do: StringComponent.add(id, foo)
@@ -35,7 +35,6 @@ defmodule ECSx.ComponentTest do
     defmodule BadReadConcurrency do
       use ECSx.Component,
         value: :integer,
-        unique: true,
         read_concurrency: :invalid
     end
 
