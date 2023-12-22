@@ -94,7 +94,7 @@ defmodule ECSx.Manager do
             Logger.info("`startup/0` complete")
 
           {:error, reason} ->
-            Logger.warn("Failed to retrieve components: #{inspect(reason)}")
+            Logger.warning("Failed to retrieve components: #{inspect(reason)}")
             setup()
             Logger.info("`setup/0` complete")
             startup()
