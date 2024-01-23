@@ -36,7 +36,7 @@ defmodule Mix.Tasks.ECSx.Helpers do
       |> ensure_list_format()
 
     new_contents =
-      [before_components, "def components do\n    ", new_list, "\n  end", after_components]
+      [before_components, "def components do\n    ", new_list, "\n  end\n", after_components]
       |> IO.iodata_to_binary()
       |> Code.format_string!()
 
