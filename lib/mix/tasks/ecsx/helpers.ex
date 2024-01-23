@@ -47,7 +47,7 @@ defmodule Mix.Tasks.ECSx.Helpers do
   defp parse_manager_components(path) do
     file = read_manager_file!(path)
     [top, rest] = String.split(file, "def components do", parts: 2)
-    [list, bottom] = String.split(rest, "end", parts: 2)
+    [list, bottom] = String.split(rest, ~r"\send\n", parts: 2)
 
     {top, bottom, list}
   end
