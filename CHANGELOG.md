@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.1 (2024-01-24)
+
+  * Fixed an issue where some Component or System naming patterns could prevent generators from working properly
+  * Replace deprecated function which was causing compiler warnings (h/t @hl)
+
 ## v0.5 (2023-09-23)
 
   * Non-unique Component types are no longer allowed (see the [upgrade guide](upgrade_guide.html))
