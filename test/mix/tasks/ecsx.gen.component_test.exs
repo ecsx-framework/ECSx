@@ -160,4 +160,50 @@ defmodule Mix.Tasks.Ecsx.Gen.ComponentTest do
       end)
     end)
   end
+
+  test "handles component types with 'end' in the name" do
+    Mix.Project.in_project(:my_app, ".", fn _module ->
+      Mix.Tasks.Ecsx.Gen.Component.run(["LegendaryComponent", "binary"])
+      Mix.Tasks.Ecsx.Gen.Component.run(["AnotherComponent", "integer"])
+
+      manager_file = File.read!("lib/my_app/manager.ex")
+
+      assert manager_file ==
+               """
+               defmodule MyApp.Manager do
+                 @moduledoc \"\"\"
+                 ECSx manager.
+                 \"\"\"
+                 use ECSx.Manager
+
+                 def setup do
+                   # Seed persistent components only for the first server start
+                   # (This will not be run on subsequent app restarts)
+                   :ok
+                 end
+
+                 def startup do
+                   # Load ephemeral components during first server start and again
+                   # on every subsequent app restart
+                   :ok
+                 end
+
+                 # Declare all valid Component types
+                 def components do
+                   [
+                     MyApp.Components.AnotherComponent,
+                     MyApp.Components.LegendaryComponent
+                   ]
+                 end
+
+                 # Declare all Systems to run
+                 def systems do
+                   [
+                     # MyApp.Systems.SampleSystem
+                   ]
+                 end
+               end
+               """
+    end)
+  end
 end

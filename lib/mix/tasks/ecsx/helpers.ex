@@ -36,7 +36,7 @@ defmodule Mix.Tasks.ECSx.Helpers do
       |> ensure_list_format()
 
     new_contents =
-      [before_components, "def components do\n    ", new_list, "\n  end", after_components]
+      [before_components, "def components do\n    ", new_list, "\n  end\n", after_components]
       |> IO.iodata_to_binary()
       |> Code.format_string!()
 
@@ -47,7 +47,7 @@ defmodule Mix.Tasks.ECSx.Helpers do
   defp parse_manager_components(path) do
     file = read_manager_file!(path)
     [top, rest] = String.split(file, "def components do", parts: 2)
-    [list, bottom] = String.split(rest, "end", parts: 2)
+    [list, bottom] = String.split(rest, ~r"\send\n", parts: 2)
 
     {top, bottom, list}
   end

@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
       |> ensure_list_format()
 
     new_contents =
-      [before_systems, "def systems do\n    ", new_list, "\n  end", after_systems]
+      [before_systems, "def systems do\n    ", new_list, "\n  end\n", after_systems]
       |> IO.iodata_to_binary()
       |> Code.format_string!()
 
@@ -62,7 +62,7 @@ defmodule Mix.Tasks.Ecsx.Gen.System do
   defp parse_manager(path) do
     file = Helpers.read_manager_file!(path)
     [top, rest] = String.split(file, "def systems do", parts: 2)
-    [list, bottom] = String.split(rest, "end", parts: 2)
+    [list, bottom] = String.split(rest, ~r"\send\n", parts: 2)
 
     {top, bottom, list}
   end
