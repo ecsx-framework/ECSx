@@ -1,7 +1,7 @@
 # ECSx
 
 [![Hex Version](https://img.shields.io/hexpm/v/ecsx.svg)](https://hex.pm/packages/ecsx)
-[![License](https://img.shields.io/hexpm/l/ecsx.svg)](https://github.com/APB9785/ECSx/blob/master/LICENSE)
+[![License](https://img.shields.io/hexpm/l/ecsx.svg)](https://github.com/ecsx-framework/ECSx/blob/master/LICENSE)
 [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/ecsx)
 
 ECSx is an Entity-Component-System (ECS) framework for Elixir. ECS is an architecture for building real-time games and simulations, wherein data about Entities is stored in small fragments called Components, which are then read and updated by Systems.
