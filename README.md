@@ -23,7 +23,7 @@ end
 
 ## Upgrading
 
-While ECSx is pre-v1.0, minor version updates will contain breaking changes.  If you are upgrading an application from ECSx 0.4.x or earlier, please refer to our [upgrade guide](guides/upgrade_guide.md).
+While ECSx is pre-v1.0, minor version updates will contain breaking changes.  If you are upgrading an application from ECSx 0.4.x or earlier, please refer to our [upgrade guide](https://hexdocs.pm/ecsx/upgrade_guide.html).
 
 ## Tutorial Project
 
