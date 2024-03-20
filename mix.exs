@@ -1,7 +1,7 @@
 defmodule ECSx.MixProject do
   use Mix.Project
 
-  @gh_url "https://github.com/APB9785/ECSx"
+  @gh_url "https://github.com/ecsx-framework/ECSx"
   @version "0.5.1"
 
   def project do
