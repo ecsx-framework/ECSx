@@ -141,6 +141,20 @@ defmodule ECSx.BaseTest do
       assert :ets.lookup(:sample_component, 123) == []
       assert :ets.lookup(:sample_component, 456) == [{456, "dos", false}]
     end
+
+    test "with index" do
+      index_table = Module.concat(:sample_component, "Index")
+
+      :ets.insert(:sample_component, {123, "uno", false})
+      :ets.insert(index_table, {"uno", 123, false})
+
+      :ets.insert(:sample_component, {456, "dos", false})
+      :ets.insert(index_table, {"dos", 456, false})
+
+      Base.remove(:sample_component, 123, index: true)
+
+      assert :ets.tab2list(index_table) == [{"dos", 456, false}]
+    end
   end
 
   describe "#exists?/2" do

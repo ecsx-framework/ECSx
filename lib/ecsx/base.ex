@@ -129,7 +129,20 @@ defmodule ECSx.Base do
       Logger.debug("#{component_type} remove #{inspect(entity_id)}")
     end
 
-    :ets.delete(component_type, entity_id)
+    if Keyword.get(opts, :index) do
+      case :ets.lookup(component_type, entity_id) do
+        [{^entity_id, value, persist}] ->
+          index_table = Module.concat(component_type, "Index")
+          :ets.delete(component_type, entity_id)
+          :ets.delete_object(index_table, {value, entity_id, persist})
+
+        _ ->
+          nil
+      end
+    else
+      :ets.delete(component_type, entity_id)
+    end
+
     :ok
   end
 

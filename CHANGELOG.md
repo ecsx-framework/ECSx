@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+  * Fixed an issue where Components with `index: true` were not fully removed with `Component.remove/1`
+
 ## v0.5.1 (2024-01-24)
 
   * Fixed an issue where some Component or System naming patterns could prevent generators from working properly
