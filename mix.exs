@@ -2,7 +2,7 @@ defmodule ECSx.MixProject do
   use Mix.Project
 
   @gh_url "https://github.com/ecsx-framework/ECSx"
-  @version "0.5.1"
+  @version "0.5.2"
 
   def project do
     [
@@ -43,7 +43,7 @@ defmodule ECSx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.29", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.36", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:excoveralls, "~> 0.14", only: :test},
       {:telemetry, "~> 1.0"},

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.5.2 (2025-01-25)
 
   * Fixed an issue where Components with `index: true` were not fully removed with `Component.remove/1`
 
